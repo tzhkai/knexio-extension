@@ -98,10 +98,10 @@ function showTranslationPopup(text, langLabel) {
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
     ">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="margin-bottom:8px">
         <span style="font-size:11px;color:#888">翻译为 ${langLabel}</span>
-        <button id="knexio-close-popup" style="background:none;border:none;color:#888;cursor:pointer;font-size:14px">✕</button>
       </div>
+      <button id="knexio-close-popup" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
       <div>${text.replace(/\n/g, '<br>')}</div>
     </div>
   `;
@@ -207,11 +207,12 @@ function extractAndShowSummary() {
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.7;
       border: 1px solid #2a2a3e;
     ">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="margin-bottom:8px">
         <span style="font-size:11px;color:#888">智能摘句 · 本页摘要</span>
-        <div style="display:flex;gap:8px">
+      </div>
+      <button id="knexio-close-summary" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
           <button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">复制</button>
-          <button id="knexio-close-summary" style="background:none;border:none;color:#888;cursor:pointer;font-size:14px">✕</button>
         </div>
       </div>
       <div>${escaped}</div>

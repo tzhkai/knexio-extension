@@ -124,11 +124,11 @@ function showInlineTranslation(text, selRect, mouseY) {
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
     ">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="margin-bottom:6px">
         <span style="font-size:11px;color:#888">翻译为中文</span>
-        <button id="knexio-close-inline" style="background:none;border:none;color:#888;cursor:pointer;font-size:14px">✕</button>
       </div>
-      <div>${text.replace(/\n/g, '<br>')}</div>
+      <button id="knexio-close-inline" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
+      <div style="padding-right:8px">${text.replace(/\n/g, '<br>')}</div>
     </div>
   `;
   document.body.appendChild(div);
