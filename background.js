@@ -1,15 +1,51 @@
 // Knexio 阅读伴侣 — background.js (service worker)
 
+// Simple inline i18n
+var _lang = ('undefined' !== typeof navigator && (navigator.language || 'en').startsWith('zh')) ? 'zh' : 'en';
+var _t = function(key) {
+  var map = {
+    zh: {
+      ctx_translate: '🔤 翻译选中文字',
+      ctx_summarize: '✂️ 智能摘句（本页）',
+      popup_translating: '翻译中…',
+      popup_translate_title: '翻译选中文字',
+      popup_summary_title: '智能摘句 · 本页摘要',
+      copied: '已复制 ✓',
+      copy: '复制',
+      close: '✕',
+      summary_translate_btn: '🌐 翻译',
+      translating: '翻译中…',
+      translated: '已翻译',
+      summary_original_btn: '查看原文'
+    },
+    en: {
+      ctx_translate: '🔤 Translate Selection',
+      ctx_summarize: '✂️ Smart Extract (Page)',
+      popup_translating: 'Translating…',
+      popup_translate_title: 'Translate Selection',
+      popup_summary_title: 'Smart Extract · Page Summary',
+      copied: 'Copied ✓',
+      copy: 'Copy',
+      close: '✕',
+      summary_translate_btn: '🌐 Translate',
+      translating: 'Translating…',
+      translated: 'Translated',
+      summary_original_btn: 'Show Original'
+    }
+  };
+  return (map[_lang] || map.en)[key] || key;
+};
+
 // ── Context menu: translate selection ──
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'translate-selection',
-    title: '🔤 翻译选中文字',
+    title: _t('ctx_translate'),
     contexts: ['selection']
   });
   chrome.contextMenus.create({
     id: 'summarize-page',
-    title: '✂️ 智能摘句（本页）',
+    title: _t('ctx_summarize'),
     contexts: ['page']
   });
 });
@@ -99,7 +135,7 @@ function showTranslationPopup(text, langLabel) {
       border: 1px solid #2a2a3e;
     ">
       <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:#888">翻译为 ${langLabel}</span>
+        <span style="font-size:11px;color:#888">' + _t('popup_translate_title') + '</span>
       </div>
       <button id="knexio-close-popup" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
       <div>${text.replace(/\n/g, '<br>')}</div>
@@ -124,6 +160,15 @@ async function handleSummarizePage(tab) {
 
 // Runs in page context — extracts paragraphs, scores, picks key sentences
 function extractAndShowSummary() {
+  // Inline i18n for page context
+  var _l = (navigator.language || 'en').startsWith('zh') ? 'zh' : 'en';
+  var _tt = function(k) {
+    var m = {
+      zh: { no_content: '页面内容较少，无法提取摘要', title: '智能摘句 · 本页摘要', copy: '复制', copied: '已复制 ✓', translate: '🌐 翻译', translating: '翻译中…', translated: '已翻译', original: '查看原文', fail: '❌' },
+      en: { no_content: 'Page has too little content to summarize', title: 'Smart Extract · Page Summary', copy: 'Copy', copied: 'Copied ✓', translate: '🌐 Translate', translating: 'Translating…', translated: 'Translated', original: 'Show Original', fail: '❌' }
+    };
+    return (m[_l] || m.en)[k] || k;
+  };
   const existing = document.getElementById('knexio-summary-popup');
   if (existing) existing.remove();
   
@@ -133,7 +178,7 @@ function extractAndShowSummary() {
   
   var summary;
   if (!paragraphs.length) {
-    summary = '页面内容较少，无法提取摘要';
+    summary = _tt('no_content');
   } else if (paragraphs.length <= 4) {
     summary = paragraphs.join('\n\n');
   } else {
@@ -191,11 +236,11 @@ function extractAndShowSummary() {
   var popup = document.createElement('div');
   popup.id = 'knexio-summary-popup';
   popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:400px;overflow-y:auto;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e">' +
-    '<div style="margin-bottom:8px"><span style="font-size:11px;color:#888">智能摘句 · 本页摘要</span></div>' +
+    '<div style="margin-bottom:8px"><span style="font-size:11px;color:#888">' + _tt('title') + '</span></div>' +
     '<button id="knexio-close-summary" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>' +
     '<div style="display:flex;gap:8px;margin-bottom:6px">' +
-      '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">复制</button>' +
-      '<button id="knexio-trans-summary" style="background:#2a2a3e;border:none;color:#e67e22;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">🌐 翻译</button>' +
+      '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">' + _tt('copy') + '</button>' +
+      '<button id="knexio-trans-summary" style="background:#2a2a3e;border:none;color:#e67e22;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">' + _tt('translate') + '</button>' +
     '</div>' +
     '<div id="knexio-summary-text">' + escaped + '</div>' +
   '</div>';
@@ -205,12 +250,12 @@ function extractAndShowSummary() {
   document.getElementById('knexio-copy-summary').onclick = function() {
     navigator.clipboard.writeText(summary);
     var btn = document.getElementById('knexio-copy-summary');
-    if (btn) { btn.textContent = '已复制 ✓'; setTimeout(function() { if (btn) btn.textContent = '复制'; }, 1500); }
+    if (btn) { btn.textContent = _tt('copied'); setTimeout(function() { if (btn) btn.textContent = _tt('copy'); }, 1500); }
   };
   document.getElementById('knexio-trans-summary').onclick = async function() {
     var btn = document.getElementById('knexio-trans-summary');
-    if (!btn || btn.textContent === '翻译中…') return;
-    btn.textContent = '翻译中…';
+    if (!btn || btn.textContent === _tt('translating')) return;
+    btn.textContent = _tt('translating');
     btn.style.color = '#888';
     try {
       var res = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=' + encodeURIComponent(summary));
@@ -218,11 +263,11 @@ function extractAndShowSummary() {
       var translated = data[0].map(function(x) { return x[0]; }).join('');
       var el = document.getElementById('knexio-summary-text');
       if (el) el.innerHTML = '<div style="color:#e67e22;margin-bottom:4px;font-size:11px">翻译为中文 ↓</div>' + el.innerHTML + '<div style="border-top:1px solid #2a2a3e;margin-top:8px;padding-top:8px">' + translated.replace(/\n/g, '<br>') + '</div>';
-      btn.textContent = '已翻译';
-      setTimeout(function() { if (btn) btn.textContent = '🌐 翻译'; btn.style.color = '#e67e22'; }, 2000);
+      btn.textContent = _tt('translated');
+      setTimeout(function() { if (btn) btn.textContent = _tt('translate'); btn.style.color = '#e67e22'; }, 2000);
     } catch(e) {
-      btn.textContent = '❌';
-      setTimeout(function() { if (btn) btn.textContent = '🌐 翻译'; btn.style.color = '#e67e22'; }, 1500);
+      btn.textContent = _tt('fail');
+      setTimeout(function() { if (btn) btn.textContent = _tt('translate'); btn.style.color = '#e67e22'; }, 1500);
     }
   };
   setTimeout(function() { if (document.getElementById('knexio-summary-popup')) popup.remove(); }, 20000);

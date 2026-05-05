@@ -3,68 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=360">
-<title>Knexio 阅读伴侣</title>
+<title data-i18n="app_name">Knexio 阅读伴侣</title>
 <link rel="stylesheet" href="popup.css">
 </head>
 <body>
 <div class="tabs">
-  <button class="tab active" data-tab="translate">📝 翻译</button>
-  <button class="tab" data-tab="summarize">🤖 摘要</button>
-  <button class="tab" data-tab="save">💾 保存</button>
+  <button class="tab active" data-tab="translate" data-i18n="translate">📝 翻译</button>
+  <button class="tab" data-tab="summarize" data-i18n="summarize">🤖 摘要</button>
+  <button class="tab" data-tab="save" data-i18n="save">💾 保存</button>
 </div>
 
 <div class="panel active" id="panel-translate">
   <select id="translate-to" class="lang-select">
-    <option value="zh-CN">翻译成 中文</option>
-    <option value="en">翻译成 English</option>
-    <option value="ja">翻译成 日本語</option>
-    <option value="ko">翻译成 한국어</option>
-    <option value="fr">翻译成 Français</option>
-    <option value="de">翻译成 Deutsch</option>
-    <option value="es">翻译成 Español</option>
-    <option value="ru">翻译成 Русский</option>
+    <option value="zh-CN" data-i18n="translate_to_zh">翻译成 中文</option>
+    <option value="en" data-i18n="translate_to_en">翻译成 English</option>
+    <option value="ja" data-i18n="translate_to_ja">翻译成 日本語</option>
+    <option value="ko" data-i18n="translate_to_ko">翻译成 한국어</option>
+    <option value="fr" data-i18n="translate_to_fr">翻译成 Français</option>
+    <option value="de" data-i18n="translate_to_de">翻译成 Deutsch</option>
+    <option value="es" data-i18n="translate_to_es">翻译成 Español</option>
+    <option value="ru" data-i18n="translate_to_ru">翻译成 Русский</option>
   </select>
-  <textarea id="translate-input" placeholder="输入文字，或选中网页文字后点右键翻译..."></textarea>
-  <button id="translate-btn" class="primary-btn">翻译</button>
+  <textarea id="translate-input" data-i18n-placeholder="translate_input_hint" placeholder="输入文字，或选中网页文字后点右键翻译..."></textarea>
+  <button id="translate-btn" class="primary-btn" data-i18n="translate_btn">翻译</button>
   <div id="translate-result" class="result-box"></div>
   <div class="result-actions" id="translate-actions" style="display:none">
-    <button class="copy-btn" data-target="translate-result">复制结果</button>
+    <button class="copy-btn" data-target="translate-result" data-i18n="copy_result">复制结果</button>
   </div>
 </div>
 
 <div class="panel" id="panel-summarize">
   <div id="summarize-status" class="status-line">
-    <span class="status-icon">🟡</span> 智能摘句就绪
+    <span class="status-icon">🟡</span> <span data-i18n="summarize_ready">智能摘句就绪</span>
   </div>
-  <p class="hint">右键页面任意位置 →「✂️ 智能摘句」或点击下方按钮。<a href="options.html" target="_blank" style="color:#4f8ff7">配置 DeepSeek</a> 后解锁 AI 语义级总结。</p>
-  <button id="summarize-btn" class="primary-btn">智能摘句</button>
-  <button id="ai-summarize-btn" class="primary-btn" style="display:none;margin-top:6px;background:#7c3aed;">✨ AI 深度总结</button>
+  <p class="hint"><span data-i18n="summarize_hint">右键页面任意位置 →「✂️ 智能摘句」或点击下方按钮。</span><a href="options.html" target="_blank" style="color:#4f8ff7"> DeepSeek</a></p>
+  <button id="summarize-btn" class="primary-btn" data-i18n="summarize_btn">智能摘句</button>
+  <button id="ai-summarize-btn" class="primary-btn" style="display:none;margin-top:6px;background:#7c3aed;" data-i18n="ai_summarize_btn">✨ AI 深度总结</button>
   <div id="summarize-result" class="result-box"></div>
   <div class="result-actions" id="summarize-actions" style="display:none">
-    <button class="copy-btn" data-target="summarize-result">复制</button>
-    <button id="summarize-translate-btn" class="copy-btn" style="color:#e67e22">🌐 翻译</button>
-    <button id="summarize-original-btn" class="copy-btn" style="display:none;color:#3498db">查看原文</button>
+    <button class="copy-btn" data-target="summarize-result" data-i18n="copy">复制</button>
+    <button id="summarize-translate-btn" class="copy-btn" style="color:#e67e22" data-i18n="summarize_translate_btn">🌐 翻译</button>
+    <button id="summarize-original-btn" class="copy-btn" style="display:none;color:#3498db" data-i18n="summarize_original_btn">查看原文</button>
   </div>
 </div>
 
 <div class="panel" id="panel-save">
-  <p class="hint">快速保存当前页面到 Knexio 书签，需要先在 Knexio 登录。</p>
+  <p class="hint" data-i18n="save_hint">快速保存当前页面到 Knexio 书签，需要先在 Knexio 登录。</p>
   <div class="save-info">
-    <div class="info-row"><span class="label">标题</span><span id="save-title">-</span></div>
-    <div class="info-row"><span class="label">链接</span><span id="save-url">-</span></div>
+    <div class="info-row"><span class="label" data-i18n="save_title_label">标题</span><span id="save-title">-</span></div>
+    <div class="info-row"><span class="label" data-i18n="save_url_label">链接</span><span id="save-url">-</span></div>
   </div>
-  <button id="save-btn" class="primary-btn">保存到 Knexio</button>
+  <button id="save-btn" class="primary-btn" data-i18n="save_btn">保存到 Knexio</button>
   <div id="save-result" class="result-box"></div>
 </div>
 
 <div class="footer">
-  <a href="options.html" target="_blank">⚙️ 设置</a>
+  <a href="options.html" target="_blank" data-i18n="settings">⚙️ 设置</a>
   <span class="sep">|</span>
   <a href="https://knexio.xyz" target="_blank">knexio.xyz</a>
   <span class="sep">|</span>
-  <span class="version">v1.0.0</span>
+  <span class="version">v1.3.0</span>
 </div>
 
+<script src="i18n.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>

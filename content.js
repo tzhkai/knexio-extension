@@ -1,6 +1,16 @@
 // Knexio 阅读伴侣 — content.js
 // Injected into every page: adds floating translate button on text selection
 
+// Simple inline i18n
+var _lang = (navigator.language || 'en').startsWith('zh') ? 'zh' : 'en';
+var _t = function(key) {
+  var map = {
+    zh: { float_translate: '🔤 翻译', float_translating: '翻译中…', failed: '翻译失败' },
+    en: { float_translate: '🔤 Translate', float_translating: 'Translating…', failed: 'Translation failed' }
+  };
+  return (map[_lang] || map.en)[key] || key;
+};
+
 let floatingBtn = null;
 
 document.addEventListener('mouseup', (e) => {
@@ -20,7 +30,7 @@ document.addEventListener('mouseup', (e) => {
   
   floatingBtn = document.createElement('div');
   floatingBtn.id = 'knexio-float-btn';
-  floatingBtn.innerHTML = '🔤 翻译';
+  floatingBtn.innerHTML = _t('float_translate');
   Object.assign(floatingBtn.style, {
     position: 'fixed',
     zIndex: '2147483646',

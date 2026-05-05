@@ -1,5 +1,16 @@
 // Knexio 阅读伴侣 — popup.js
 
+// ── Apply i18n to all [data-i18n] elements ──
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = I18N.t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = I18N.t(el.dataset.i18nPlaceholder);
+  });
+}
+applyI18n();
+
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -17,10 +28,10 @@ document.getElementById('translate-btn').addEventListener('click', async () => {
   const resultBox = document.getElementById('translate-result');
   const actions = document.getElementById('translate-actions');
   
-  if (!input) { resultBox.textContent = '请先输入文字'; return; }
+  if (!input) { resultBox.textContent = I18N.t('translate_input_hint'); return; }
   if (input.length > 5000) { resultBox.textContent = '文字太长，最多 5000 字'; return; }
   
-  resultBox.textContent = '⏳ 翻译中...';
+  resultBox.textContent = I18N.t('translating');
   actions.style.display = 'none';
   
   try {
@@ -30,7 +41,7 @@ document.getElementById('translate-btn').addEventListener('click', async () => {
     resultBox.textContent = translated;
     actions.style.display = 'block';
   } catch (e) {
-    resultBox.textContent = '翻译失败：' + e.message;
+    resultBox.textContent = I18N.t('translate_failed') + ': ' + e.message;
   }
 });
 
@@ -39,12 +50,13 @@ let hasApiKey = false;
 let currentPageText = '';
 
 chrome.storage.sync.get(['deepseek_api_key'], async (items) => {
+  const status = document.getElementById('summarize-status');
   if (items.deepseek_api_key) {
     hasApiKey = true;
-    document.getElementById('summarize-status').innerHTML = '<span class="status-icon">🟢</span> 智能摘句就绪 · AI 深度总结已解锁';
+    status.innerHTML = '<span class="status-icon">🟢</span> ' + I18N.t('summarize_ready_ai');
     document.getElementById('ai-summarize-btn').style.display = 'block';
   } else {
-    document.getElementById('summarize-status').innerHTML = '<span class="status-icon">🟡</span> 智能摘句就绪 · <a href="options.html" target="_blank" style="color:#4f8ff7">配置 DeepSeek</a> 解锁 AI 深度总结';
+    status.innerHTML = '<span class="status-icon">🟡</span> ' + I18N.t('summarize_ready_no_ai');
   }
 });
 
@@ -67,13 +79,11 @@ async function extractPageContent() {
 // Extractive summarization — picks key sentences, pure frontend no AI
 function buildExtractiveSummary(data) {
   const paras = data.paragraphs;
-  if (!paras.length) return '页面内容较少，无法提取摘要';
+  if (!paras.length) return I18N.t('summarize_no_content');
   if (paras.length <= 4) return '📄 ' + data.title + '\n\n' + paras.join('\n\n');
   
-  // Score each paragraph
   const sentences = [];
   paras.forEach((p, i) => {
-    // Split long paragraphs into sentences
     const parts = p.split(/(?<=[。！？.!?])\s*/).filter(s => s.length > 10);
     parts.forEach((s, j) => {
       sentences.push({ text: s, paraIdx: i, posInPara: j });
@@ -82,7 +92,6 @@ function buildExtractiveSummary(data) {
   
   if (sentences.length <= 5) return '📄 ' + data.title + '\n\n' + sentences.map(s => s.text).join(' ');
   
-  // Build word frequency for keyword scoring
   const wordFreq = {};
   sentences.forEach(s => {
     s.text.split(/[，。！？,\.!?\s]+/).forEach(w => {
@@ -91,19 +100,13 @@ function buildExtractiveSummary(data) {
   });
   const totalSentences = sentences.length;
   
-  // Score each sentence
   sentences.forEach((s, i) => {
     let score = 0;
-    
-    // Position: earlier sentences are more important
     score += 2.0 / Math.sqrt(i / 2 + 1);
-    
-    // Length: prefer 40-150 char sentences
     const len = s.text.length;
     if (len > 40 && len < 150) score += 1.5;
     else if (len < 20 || len > 250) score -= 1;
     
-    // Keyword density: how many frequent words appear
     const words = s.text.split(/[，。！？,\.!?\s]+/).filter(w => w.length >= 3);
     let kwScore = 0;
     words.forEach(w => {
@@ -111,16 +114,13 @@ function buildExtractiveSummary(data) {
     });
     score += kwScore / Math.max(words.length, 1) * 3;
     
-    // Title overlap boost
     if (data.title) {
       const titleWords = new Set(data.title.split(/[\s]+/).filter(w => w.length >= 2));
       words.forEach(w => { if (titleWords.has(w)) score += 0.5; });
     }
-    
     s.score = score;
   });
   
-  // Pick top N, keep original order
   const topN = Math.min(8, Math.max(4, Math.floor(sentences.length * 0.3)));
   sentences.sort((a, b) => b.score - a.score);
   const picked = sentences.slice(0, topN);
@@ -129,43 +129,43 @@ function buildExtractiveSummary(data) {
   return '📄 ' + data.title + '\n\n' + picked.map(s => s.text).join(' ');
 }
 
-// Smart extract button — always works
+// Smart extract button
 document.getElementById('summarize-btn').addEventListener('click', async () => {
   const btn = document.getElementById('summarize-btn');
   const resultBox = document.getElementById('summarize-result');
   
   btn.disabled = true;
-  btn.textContent = '⏳ 分析页面内容...';
+  btn.textContent = I18N.t('summarize_analyzing');
   resultBox.textContent = '';
   document.getElementById('summarize-actions').style.display = 'none';
   
   try {
     const data = await extractPageContent();
     if (!data || !data.paragraphs.length) {
-      resultBox.textContent = '页面内容太少，无法提取摘要';
-      btn.textContent = '智能摘句';
+      resultBox.textContent = I18N.t('summarize_no_content');
+      btn.textContent = I18N.t('summarize_btn');
       btn.disabled = false;
       return;
     }
     currentPageText = data.fullText;
     resultBox.textContent = buildExtractiveSummary(data);
-    btn.textContent = '智能摘句';
+    btn.textContent = I18N.t('summarize_btn');
     btn.disabled = false;
     document.getElementById('summarize-actions').style.display = 'block';
   } catch (e) {
-    resultBox.textContent = '提取失败：' + e.message;
-    btn.textContent = '智能摘句';
+    resultBox.textContent = I18N.t('summarize_extract_fail') + ': ' + e.message;
+    btn.textContent = I18N.t('summarize_btn');
     btn.disabled = false;
   }
 });
 
-// AI summary button — needs DeepSeek key
+// AI summary button
 document.getElementById('ai-summarize-btn').addEventListener('click', async () => {
   const btn = document.getElementById('ai-summarize-btn');
   const resultBox = document.getElementById('summarize-result');
   
   btn.disabled = true;
-  btn.textContent = '⏳ AI 思考中...';
+  btn.textContent = I18N.t('summarize_ai_thinking');
   
   try {
     if (!currentPageText) {
@@ -174,16 +174,16 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
     }
     
     if (currentPageText.length < 100) {
-      resultBox.textContent = '页面内容太少，无法生成 AI 摘要';
-      btn.textContent = '✨ AI 深度总结';
+      resultBox.textContent = I18N.t('summarize_ai_no_content');
+      btn.textContent = I18N.t('ai_summarize_btn');
       btn.disabled = false;
       return;
     }
     
     const { deepseek_api_key } = await chrome.storage.sync.get(['deepseek_api_key']);
     if (!deepseek_api_key) {
-      resultBox.textContent = '请先在设置页配置 DeepSeek API Key';
-      btn.textContent = '✨ AI 深度总结';
+      resultBox.textContent = I18N.t('summarize_ai_no_key');
+      btn.textContent = I18N.t('ai_summarize_btn');
       btn.disabled = false;
       return;
     }
@@ -206,15 +206,15 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
     });
     
     const data = await apiRes.json();
-    if (data.error) throw new Error(data.error.message || 'API 错误');
+    if (data.error) throw new Error(data.error.message || 'API error');
     resultBox.textContent = data.choices[0].message.content;
-    btn.textContent = '✨ AI 深度总结';
+    btn.textContent = I18N.t('ai_summarize_btn');
     btn.disabled = false;
     document.getElementById('summarize-actions').style.display = 'block';
     
   } catch (e) {
-    resultBox.textContent = 'AI 摘要失败：' + e.message;
-    btn.textContent = '✨ AI 深度总结';
+    resultBox.textContent = I18N.t('summarize_ai_fail') + ': ' + e.message;
+    btn.textContent = I18N.t('ai_summarize_btn');
     btn.disabled = false;
   }
 });
@@ -228,12 +228,12 @@ document.getElementById('summarize-translate-btn').addEventListener('click', asy
   const origBtn = document.getElementById('summarize-original-btn');
   const resultBox = document.getElementById('summarize-result');
   
-  if (summarizeTranslated) return; // already translated
+  if (summarizeTranslated) return;
   
   const text = resultBox.textContent;
-  if (!text || text.startsWith('⏳') || text.startsWith('提取失败') || text === '页面内容太少' || text.startsWith('AI 摘要失败')) return;
+  if (!text || text.startsWith('⏳') || text.startsWith(I18N.t('summarize_extract_fail')) || text === I18N.t('summarize_no_content') || text.startsWith(I18N.t('summarize_ai_fail'))) return;
   
-  btn.textContent = '翻译中…';
+  btn.textContent = I18N.t('translating');
   btn.disabled = true;
   
   try {
@@ -244,12 +244,12 @@ document.getElementById('summarize-translate-btn').addEventListener('click', asy
     summarizeOriginalText = text;
     summarizeTranslated = true;
     resultBox.textContent = translated;
-    btn.textContent = '已翻译';
+    btn.textContent = I18N.t('translated');
     btn.style.color = '#27ae60';
     origBtn.style.display = 'inline-block';
   } catch (e) {
-    btn.textContent = '失败';
-    setTimeout(() => { btn.textContent = '🌐 翻译'; btn.disabled = false; }, 1500);
+    btn.textContent = I18N.t('translate_failed');
+    setTimeout(() => { btn.textContent = I18N.t('summarize_translate_btn'); btn.disabled = false; }, 1500);
   }
 });
 
@@ -261,7 +261,7 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
   if (summarizeTranslated) {
     resultBox.textContent = summarizeOriginalText;
     summarizeTranslated = false;
-    btn.textContent = '🌐 翻译';
+    btn.textContent = I18N.t('summarize_translate_btn');
     btn.style.color = '#e67e22';
     btn.disabled = false;
     origBtn.style.display = 'none';
@@ -277,17 +277,17 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
 
 document.getElementById('save-btn').addEventListener('click', async () => {
   const resultBox = document.getElementById('save-result');
-  resultBox.textContent = '⚠️ 保存到 Knexio 功能需要后端支持，当前为占位。可通过 knexio.xyz 手动添加书签。';
+  resultBox.textContent = I18N.t('save_placeholder');
 });
 
 // ── Copy buttons ──
 document.querySelectorAll('.copy-btn[data-target]').forEach(btn => {
   const origText = btn.textContent;
   btn.addEventListener('click', (e) => {
-    if (btn.id && btn.id !== '') return; // skip translate/original buttons
+    if (btn.id && btn.id !== '') return;
     const target = document.getElementById(btn.dataset.target);
     navigator.clipboard.writeText(target.textContent);
-    btn.textContent = '已复制 ✓';
+    btn.textContent = I18N.t('copied');
     setTimeout(() => btn.textContent = origText, 1500);
   });
 });
