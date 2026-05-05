@@ -219,6 +219,55 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
   }
 });
 
+// ── 摘要翻译按钮 ──
+let summarizeOriginalText = '';
+let summarizeTranslated = false;
+
+document.getElementById('summarize-translate-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('summarize-translate-btn');
+  const origBtn = document.getElementById('summarize-original-btn');
+  const resultBox = document.getElementById('summarize-result');
+  
+  if (summarizeTranslated) return; // already translated
+  
+  const text = resultBox.textContent;
+  if (!text || text.startsWith('⏳') || text.startsWith('提取失败') || text === '页面内容太少' || text.startsWith('AI 摘要失败')) return;
+  
+  btn.textContent = '翻译中…';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${encodeURIComponent(text)}`);
+    const data = await res.json();
+    const translated = data[0].map(x => x[0]).join('');
+    
+    summarizeOriginalText = text;
+    summarizeTranslated = true;
+    resultBox.textContent = translated;
+    btn.textContent = '已翻译';
+    btn.style.color = '#27ae60';
+    origBtn.style.display = 'inline-block';
+  } catch (e) {
+    btn.textContent = '失败';
+    setTimeout(() => { btn.textContent = '🌐 翻译'; btn.disabled = false; }, 1500);
+  }
+});
+
+document.getElementById('summarize-original-btn').addEventListener('click', () => {
+  const resultBox = document.getElementById('summarize-result');
+  const btn = document.getElementById('summarize-translate-btn');
+  const origBtn = document.getElementById('summarize-original-btn');
+  
+  if (summarizeTranslated) {
+    resultBox.textContent = summarizeOriginalText;
+    summarizeTranslated = false;
+    btn.textContent = '🌐 翻译';
+    btn.style.color = '#e67e22';
+    btn.disabled = false;
+    origBtn.style.display = 'none';
+  }
+});
+
 // ── Save ──
 (async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -232,11 +281,13 @@ document.getElementById('save-btn').addEventListener('click', async () => {
 });
 
 // ── Copy buttons ──
-document.querySelectorAll('.copy-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll('.copy-btn[data-target]').forEach(btn => {
+  const origText = btn.textContent;
+  btn.addEventListener('click', (e) => {
+    if (btn.id && btn.id !== '') return; // skip translate/original buttons
     const target = document.getElementById(btn.dataset.target);
     navigator.clipboard.writeText(target.textContent);
     btn.textContent = '已复制 ✓';
-    setTimeout(() => btn.textContent = '复制结果', 1500);
+    setTimeout(() => btn.textContent = origText, 1500);
   });
 });
