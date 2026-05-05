@@ -1,75 +1,62 @@
-// Options page controller — directly reads/writes chrome.storage
+// Knexio 阅读伴侣 — options.js
 
-const STORAGE_KEY = 'knexio_reader';
+// ── API Key ──
+const keyInput = document.getElementById('api-key-input');
+const keyStatus = document.getElementById('key-status');
+const toggleBtn = document.getElementById('toggle-key');
 
-function getSettings() {
-  return new Promise(resolve => {
-    chrome.storage.local.get(STORAGE_KEY, d => resolve(d[STORAGE_KEY] || {}));
-  });
-}
-
-function setSettings(updates) {
-  return new Promise(resolve => {
-    chrome.storage.local.get(STORAGE_KEY, d => {
-      const current = d[STORAGE_KEY] || {};
-      chrome.storage.local.set({ [STORAGE_KEY]: { ...current, ...updates } }, resolve);
-    });
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadSettings();
-  loadQuota();
-  document.getElementById('save-key').addEventListener('click', saveApiKey);
-  document.getElementById('save-lang').addEventListener('click', saveLang);
+// Load saved key
+chrome.storage.sync.get(['deepseek_api_key'], (items) => {
+  if (items.deepseek_api_key) {
+    keyInput.value = items.deepseek_api_key;
+    keyStatus.textContent = '✅ DeepSeek 已配置 — 摘要功能可用';
+    keyStatus.className = 'status ok';
+  }
 });
 
-async function loadSettings() {
-  try {
-    const s = await getSettings();
-    if (s.userApiKey) document.getElementById('api-key').value = s.userApiKey;
-    if (s.targetLang) document.getElementById('default-lang').value = s.targetLang;
-  } catch (e) { console.log(e); }
-}
+// Toggle visibility
+toggleBtn.addEventListener('click', () => {
+  const isPassword = keyInput.type === 'password';
+  keyInput.type = isPassword ? 'text' : 'password';
+  toggleBtn.textContent = isPassword ? '🙈' : '👁️';
+});
 
-async function loadQuota() {
-  try {
-    const s = await getSettings();
-    const display = document.getElementById('quota-display');
-    if (s.userApiKey) {
-      display.textContent = '无限';
-      display.className = 'quota-number';
-    } else {
-      const today = new Date().toDateString();
-      const used = s.quotaDate === today ? (s.quotaUsed || 0) : 0;
-      const remaining = 10 - used;
-      display.textContent = remaining;
-      display.className = `quota-number ${remaining === 0 ? 'empty' : ''}`;
-    }
-  } catch (e) { console.log(e); }
-}
-
-async function saveApiKey() {
-  const key = document.getElementById('api-key').value.trim();
-  const msg = document.getElementById('save-msg');
-  if (key && !key.startsWith('sk-')) {
-    msg.textContent = '⚠️ API Key 格式不正确，应以 sk- 开头';
-    msg.className = 'error';
+// Save
+document.getElementById('save-key').addEventListener('click', () => {
+  const key = keyInput.value.trim();
+  if (!key) {
+    keyStatus.textContent = '请输入 API Key';
+    keyStatus.className = 'status warn';
     return;
   }
-  try {
-    await setSettings({ userApiKey: key });
-    msg.textContent = '✅ 已保存';
-    msg.className = 'success';
-    loadQuota();
-  } catch (e) {
-    msg.textContent = '保存失败';
-    msg.className = 'error';
+  if (!key.startsWith('sk-')) {
+    keyStatus.textContent = '⚠️ API Key 格式不太对（应该以 sk- 开头），确定要保存吗？再点一次确认';
+    keyStatus.className = 'status warn';
+    return;
   }
-}
+  chrome.storage.sync.set({ deepseek_api_key: key }, () => {
+    keyStatus.textContent = '✅ 已保存 — 回到网页试试点插件图标 → 摘要';
+    keyStatus.className = 'status ok';
+  });
+});
 
-async function saveLang() {
-  try {
-    await setSettings({ targetLang: document.getElementById('default-lang').value });
-  } catch (e) { console.log(e); }
-}
+// Clear
+document.getElementById('clear-key').addEventListener('click', () => {
+  chrome.storage.sync.remove('deepseek_api_key', () => {
+    keyInput.value = '';
+    keyStatus.textContent = '已清除 API Key';
+    keyStatus.className = 'status';
+  });
+});
+
+// ── Default language ──
+const langSelect = document.getElementById('default-lang');
+chrome.storage.sync.get(['default_lang'], (items) => {
+  if (items.default_lang) langSelect.value = items.default_lang;
+});
+
+document.getElementById('save-lang').addEventListener('click', () => {
+  chrome.storage.sync.set({ default_lang: langSelect.value }, () => {
+    alert('默认语言已保存');
+  });
+});

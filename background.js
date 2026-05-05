@@ -1,166 +1,196 @@
-// Background service worker — only handles right-click context menus
-// Popup is fully self-contained
+// Knexio 阅读伴侣 — background.js (service worker)
 
-const FREE_DAILY_QUOTA = 10;
-const STORAGE_KEY = 'knexio_reader';
-
-try {
-
+// ── Context menu: translate selection ──
 chrome.runtime.onInstalled.addListener(() => {
-  try {
-    chrome.contextMenus.removeAll(() => {
-      chrome.contextMenus.create({ id: 'translate-selection', title: '🌐 翻译选中文本', contexts: ['selection'] });
-      chrome.contextMenus.create({ id: 'summarize-selection', title: '📝 AI 摘要选中文本', contexts: ['selection'] });
-      chrome.contextMenus.create({ id: 'summarize-page', title: '📝 摘要整个页面', contexts: ['page'] });
-    });
-  } catch (e) {}
+  chrome.contextMenus.create({
+    id: 'translate-selection',
+    title: '🔤 翻译选中文字',
+    contexts: ['selection']
+  });
+  chrome.contextMenus.create({
+    id: 'summarize-page',
+    title: '✂️ 智能摘句（本页）',
+    contexts: ['page']
+  });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  try {
-    if (info.menuItemId === 'translate-selection') {
-      doContextTranslate(info.selectionText, tab.id);
-    } else if (info.menuItemId === 'summarize-selection') {
-      doContextSummarize(info.selectionText, tab.id);
-    } else if (info.menuItemId === 'summarize-page') {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          const main = document.querySelector('main, article, .content, #content') || document.body;
-          const clone = main.cloneNode(true);
-          clone.querySelectorAll('script, style, nav, footer, header, noscript').forEach(el => el.remove());
-          return clone.innerText.substring(0, 8000);
-        }
-      }).then(([r]) => { if (r?.result) doContextSummarize(r.result, tab.id); });
-    }
-  } catch (e) {}
+  if (info.menuItemId === 'translate-selection' && info.selectionText) {
+    handleTranslateSelection(info.selectionText, tab);
+  }
+  if (info.menuItemId === 'summarize-page') {
+    handleSummarizePage(tab);
+  }
 });
 
-// ====== Context actions ======
-
-async function doContextTranslate(text, tabId) {
-  const lang = detectLanguage(text);
-  if (lang === 'zh') {
-    injectPanel(tabId, '🌐 翻译结果', text, text);
-    return;
-  }
+async function handleTranslateSelection(text, tab) {
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh&dt=t&q=${encodeURIComponent(text)}`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-    const translated = data[0].filter(p => p && p[0]).map(p => p[0]).join('');
-    injectPanel(tabId, '🌐 翻译结果', translated, text.substring(0, 200));
+    // Detect language first
+    const detectRes = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${encodeURIComponent(text.substring(0, 100))}`
+    );
+    const detectData = await detectRes.json();
+    const srcLang = detectData[2] || 'auto';
+    
+    // Auto-detect target: if source is Chinese, translate to English; otherwise to Chinese
+    const targetLang = srcLang === 'zh-CN' ? 'en' : 'zh-CN';
+    
+    // Full translation
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+    );
+    const data = await res.json();
+    const translated = data[0].map(x => x[0]).join('');
+    
+    // Inject result into page
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: showTranslationPopup,
+      args: [translated, targetLang === 'en' ? 'English' : '中文']
+    });
   } catch (e) {
-    injectPanel(tabId, '⚠️ 错误', '翻译失败: ' + e.message);
+    console.error('Translation error:', e);
   }
 }
 
-async function doContextSummarize(text, tabId) {
-  const s = await getSettings();
-  const quota = await checkQuota(s);
-  if (!s.userApiKey && !quota.ok) {
-    injectPanel(tabId, '⚠️ 错误', '今日免费额度已用完，请在设置中填入API Key或明天再来。');
-    return;
-  }
+// This function runs in the page context
+function showTranslationPopup(text, langLabel) {
+  // Remove any existing popup
+  const existing = document.getElementById('knexio-translate-popup');
+  if (existing) existing.remove();
+  
+  const popup = document.createElement('div');
+  popup.id = 'knexio-translate-popup';
+  popup.innerHTML = `
+    <div style="
+      position: fixed; bottom: 20px; right: 20px; z-index: 2147483647;
+      max-width: 420px; max-height: 300px; overflow-y: auto;
+      background: #1a1a2e; color: #e0e0e0;
+      padding: 14px 16px; border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
+      border: 1px solid #2a2a3e;
+    ">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;color:#888">翻译为 ${langLabel}</span>
+        <button id="knexio-close-popup" style="background:none;border:none;color:#888;cursor:pointer;font-size:14px">✕</button>
+      </div>
+      <div>${text.replace(/\n/g, '<br>')}</div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  document.getElementById('knexio-close-popup').onclick = () => popup.remove();
+  setTimeout(() => { if (document.getElementById('knexio-translate-popup')) popup.remove(); }, 15000);
+}
+
+// ── Summarize page (context menu) ──
+async function handleSummarizePage(tab) {
   try {
-    const maxLen = s.userApiKey ? 6000 : 3000;
-    const truncated = text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
-    let result;
-    if (s.userApiKey) {
-      result = await summarizeDeepSeek(truncated, s.userApiKey);
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: extractAndShowSummary
+    });
+  } catch (e) {
+    console.error('Summary error:', e);
+  }
+}
+
+// Runs in page context — extracts paragraphs, scores, picks key sentences
+function extractAndShowSummary() {
+  const existing = document.getElementById('knexio-summary-popup');
+  if (existing) existing.remove();
+  
+  const title = document.title || '';
+  const article = document.querySelector('article') || document.querySelector('main') || document.body;
+  const paragraphs = Array.from(article.querySelectorAll('p')).map(p => p.innerText.trim()).filter(t => t.length > 30);
+  
+  let summary;
+  if (!paragraphs.length) {
+    summary = '页面内容较少，无法提取摘要';
+  } else if (paragraphs.length <= 4) {
+    summary = '📄 ' + title + '\\n\\n' + paragraphs.join('\\n\\n');
+  } else {
+    // Split into sentences and score
+    const sentences = [];
+    paragraphs.forEach((p, i) => {
+      const parts = p.split(/(?<=[。！？.!?])\\s*/).filter(s => s.length > 10);
+      parts.forEach((s, j) => sentences.push({ text: s, paraIdx: i, posInPara: j }));
+    });
+    
+    if (sentences.length <= 5) {
+      summary = '📄 ' + title + '\\n\\n' + sentences.map(s => s.text).join(' ');
     } else {
-      result = await summarizeLocal(truncated);
-      await useQuota(s);
+      // Word frequency
+      const wordFreq = {};
+      sentences.forEach(s => {
+        s.text.split(/[，。！？,\\.!?\\s]+/).forEach(w => {
+          if (w.length >= 3) wordFreq[w] = (wordFreq[w] || 0) + 1;
+        });
+      });
+      const totalSentences = sentences.length;
+      
+      sentences.forEach((s, i) => {
+        let score = 2.0 / Math.sqrt(i / 2 + 1); // position
+        const len = s.text.length;
+        if (len > 40 && len < 150) score += 1.5;
+        else if (len < 20 || len > 250) score -= 1;
+        
+        const words = s.text.split(/[，。！？,\\.!?\\s]+/).filter(w => w.length >= 3);
+        let kwScore = 0;
+        words.forEach(w => {
+          if (wordFreq[w] && wordFreq[w] > 1) kwScore += Math.min(wordFreq[w] / totalSentences * 5, 1);
+        });
+        score += kwScore / Math.max(words.length, 1) * 3;
+        
+        if (title) {
+          const tw = new Set(title.split(/[\\s]+/).filter(w => w.length >= 2));
+          words.forEach(w => { if (tw.has(w)) score += 0.5; });
+        }
+        s.score = score;
+      });
+      
+      const topN = Math.min(8, Math.max(4, Math.floor(sentences.length * 0.3)));
+      sentences.sort((a, b) => b.score - a.score);
+      const picked = sentences.slice(0, topN);
+      picked.sort((a, b) => a.paraIdx - b.paraIdx || a.posInPara - b.posInPara);
+      
+      summary = '📄 ' + title + '\\n\\n' + picked.map(s => s.text).join(' ');
     }
-    injectPanel(tabId, '📝 AI 摘要', result.summary);
-  } catch (e) {
-    injectPanel(tabId, '⚠️ 错误', '摘要失败: ' + e.message);
   }
+  
+  // Copyable summary text
+  const escaped = summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+  
+  const popup = document.createElement('div');
+  popup.id = 'knexio-summary-popup';
+  popup.innerHTML = `
+    <div style="
+      position: fixed; bottom: 20px; right: 20px; z-index: 2147483647;
+      max-width: 440px; max-height: 360px; overflow-y: auto;
+      background: #1a1a2e; color: #e0e0e0;
+      padding: 14px 16px; border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.7;
+      border: 1px solid #2a2a3e;
+    ">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;color:#888">智能摘句 · 本页摘要</span>
+        <div style="display:flex;gap:8px">
+          <button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">复制</button>
+          <button id="knexio-close-summary" style="background:none;border:none;color:#888;cursor:pointer;font-size:14px">✕</button>
+        </div>
+      </div>
+      <div>${escaped}</div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  
+  const rawText = summary;
+  document.getElementById('knexio-copy-summary').onclick = () => {
+    navigator.clipboard.writeText(rawText);
+    const btn = document.getElementById('knexio-copy-summary');
+    if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => { if (btn) btn.textContent = '复制'; }, 1500); }
+  };
+  document.getElementById('knexio-close-summary').onclick = () => popup.remove();
+  setTimeout(() => { if (document.getElementById('knexio-summary-popup')) popup.remove(); }, 20000);
 }
-
-function injectPanel(tabId, title, result, original) {
-  const escapedResult = result.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const inner = original
-    ? `<div class="knexio-original">${original.replace(/</g, '&lt;')}${original.length > 200 ? '...' : ''}</div><div class="knexio-result">${escapedResult}</div>`
-    : `<div class="knexio-result">${escapedResult}</div>`;
-  const html = `<div id="knexio-panel" style="position:fixed;bottom:20px;right:20px;width:380px;max-height:400px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;color:#e0e0e0;overflow:hidden;animation:knexio-in 0.25s ease-out"><style>@keyframes knexio-in{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.knexio-original{font-size:12px;color:#666;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed #2a2a4a}.knexio-result{white-space:pre-wrap;word-break:break-word}</style><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#16213e;border-bottom:1px solid #2a2a4a;font-weight:600"><span>${title}</span><button onclick="this.closest('#knexio-panel').remove()" style="background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:2px 6px;border-radius:4px">✕</button></div><div style="padding:12px;max-height:280px;overflow-y:auto;line-height:1.6">${inner}</div><div style="padding:4px 12px 8px;display:flex;gap:8px"><button onclick="navigator.clipboard.writeText(document.querySelector('#knexio-panel .knexio-result').textContent)" style="font-size:12px;padding:3px 8px;background:#2a2a4a;border:none;border-radius:4px;color:#a0a0c0;cursor:pointer">📋 复制</button></div></div><script>setTimeout(()=>{const p=document.getElementById('knexio-panel');if(p)p.remove()},30000)</script>`;
-  chrome.scripting.executeScript({
-    target: { tabId },
-    func: (h) => { const d = document.createElement('div'); d.innerHTML = h; document.body.appendChild(d.firstElementChild); },
-    args: [html]
-  }).catch(() => {});
-  setTimeout(() => {
-    chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => { const p = document.getElementById('knexio-panel'); if (p) p.remove(); }
-    }).catch(() => {});
-  }, 30000);
-}
-
-// ====== Core functions ======
-
-function detectLanguage(text) {
-  const cjk = (text.match(/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/g) || []).length;
-  return cjk / Math.max(text.length, 1) > 0.3 ? 'zh' : 'en';
-}
-
-async function getSettings() {
-  return new Promise(resolve => {
-    chrome.storage.local.get(STORAGE_KEY, d => resolve(d[STORAGE_KEY] || {}));
-  });
-}
-
-async function checkQuota(s) {
-  const today = new Date().toDateString();
-  if (s.userApiKey) return { ok: true, hasKey: true };
-  if (s.quotaDate !== today) return { ok: true, hasKey: false };
-  return { ok: (s.quotaUsed || 0) < FREE_DAILY_QUOTA, hasKey: false };
-}
-
-async function useQuota(s) {
-  s.quotaUsed = (s.quotaUsed || 0) + 1;
-  s.quotaDate = new Date().toDateString();
-  await new Promise(resolve => chrome.storage.local.set({ [STORAGE_KEY]: s }, resolve));
-}
-
-async function summarizeLocal(text) {
-  const lang = detectLanguage(text);
-  const sentences = text.match(/[^。！？.!?\n]+[。！？.!?\n]?/g) || [text];
-  const keywords = ['重要', '关键', '核心', '结论', '因此', '所以', '建议', 'important', 'key', 'conclusion', 'therefore', 'recommend', 'result'];
-  const scored = sentences.map((s, i) => {
-    let score = keywords.filter(kw => s.toLowerCase().includes(kw.toLowerCase())).length;
-    if (i === 0 || i === sentences.length - 1) score += 1;
-    if (s.length > 30) score += 0.5;
-    return { text: s.trim(), score };
-  });
-  const top = scored.filter(s => s.text.length > 10).sort((a, b) => b.score - a.score).slice(0, 5);
-  let summary = top.map(s => s.text).join('\n');
-  if (lang === 'en' && summary) {
-    try {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=${encodeURIComponent(summary)}`;
-      const resp = await fetch(url);
-      const data = await resp.json();
-      summary = data[0].filter(p => p && p[0]).map(p => p[0]).join('');
-    } catch (e) {}
-  }
-  return { summary: summary || '未能提取摘要', method: '本地提取' };
-}
-
-async function summarizeDeepSeek(text, apiKey) {
-  const resp = await fetch('https://api.deepseek.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: 'deepseek-chat',
-      messages: [{ role: 'user', content: `请用中文简要总结以下内容的核心要点（3-5句话）：\n\n${text}` }],
-      max_tokens: 500, temperature: 0.3
-    })
-  });
-  if (!resp.ok) throw new Error('DeepSeek API 错误');
-  const data = await resp.json();
-  return { summary: data.choices?.[0]?.message?.content || '摘要失败', method: 'DeepSeek' };
-}
-
-} catch (e) { console.log('Knexio bg init:', e.message); }
-
-console.log('Knexio background ready');
