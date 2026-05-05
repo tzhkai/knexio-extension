@@ -48,7 +48,9 @@ document.addEventListener('mouseup', (e) => {
       floatingBtn.remove();
       floatingBtn = null;
       
-      showInlineTranslation(translated, rect);
+      // Position relative to selection, avoiding overlap
+      const mouseY = e.clientY;
+      showInlineTranslation(translated, rect, mouseY);
     } catch (e) {
       floatingBtn.innerHTML = '❌';
       setTimeout(() => { if (floatingBtn) floatingBtn.remove(); floatingBtn = null; }, 1000);
@@ -66,18 +68,56 @@ document.addEventListener('mousedown', (e) => {
   }
 });
 
-function showInlineTranslation(text, rect) {
+function showInlineTranslation(text, selRect, mouseY) {
   const existing = document.getElementById('knexio-inline-trans');
   if (existing) existing.remove();
+
+  const popupW = 420;
+  const popupH = 240; // max-height
+  const gap = 8;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
   
+  // Horizontal: center on selection, clamp to viewport
+  let left = selRect.left + selRect.width / 2 - popupW / 2;
+  left = Math.max(8, Math.min(vw - popupW - 8, left));
+  
+  // Vertical: prefer opposite side of mouse within selection
+  // If mouse is in upper half of selection → show below; lower half → show above
+  const selMid = selRect.top + selRect.height / 2;
+  const spaceBelow = vh - selRect.bottom - gap;
+  const spaceAbove = selRect.top - gap;
+  
+  let top, fromBottom;
+  if (mouseY < selMid && spaceBelow > 120) {
+    // Show below
+    top = selRect.bottom + gap;
+    fromBottom = false;
+  } else if (spaceAbove > 120) {
+    // Show above
+    top = selRect.top - gap;
+    fromBottom = true;
+  } else if (spaceBelow > 100) {
+    top = selRect.bottom + gap;
+    fromBottom = false;
+  } else {
+    top = selRect.top - gap;
+    fromBottom = true;
+  }
+  
+  // Actual max height: clamp to available space
+  const maxH = Math.min(popupH, fromBottom ? selRect.top - 16 : vh - selRect.bottom - 16);
+
   const div = document.createElement('div');
   div.id = 'knexio-inline-trans';
   div.innerHTML = `
     <div style="
       position: fixed; z-index: 2147483647;
-      top: ${rect.bottom + window.scrollY + 6}px;
-      left: ${rect.left + window.scrollX}px;
-      max-width: 420px; max-height: 240px; overflow-y: auto;
+      top: ${top}px;
+      left: ${left}px;
+      width: ${popupW}px;
+      max-height: ${Math.max(60, maxH)}px;
+      overflow-y: auto;
       background: #1a1a2e; color: #e0e0e0;
       padding: 10px 14px; border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);

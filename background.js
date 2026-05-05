@@ -55,16 +55,43 @@ async function handleTranslateSelection(text, tab) {
 
 // This function runs in the page context
 function showTranslationPopup(text, langLabel) {
-  // Remove any existing popup
   const existing = document.getElementById('knexio-translate-popup');
   if (existing) existing.remove();
+  
+  // Try to position near the current selection
+  const sel = window.getSelection();
+  const popupW = 420;
+  let top, left;
+  
+  if (sel && sel.rangeCount > 0) {
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gap = 8;
+    
+    left = Math.max(8, Math.min(vw - popupW - 8, rect.left + rect.width / 2 - popupW / 2));
+    
+    // Show below selection if space; otherwise above
+    if (vh - rect.bottom - gap > 120) {
+      top = rect.bottom + gap;
+    } else {
+      top = Math.max(8, rect.top - gap);
+    }
+  } else {
+    // Fallback: center of viewport
+    top = window.innerHeight * 0.3;
+    left = Math.max(8, window.innerWidth / 2 - popupW / 2);
+  }
   
   const popup = document.createElement('div');
   popup.id = 'knexio-translate-popup';
   popup.innerHTML = `
     <div style="
-      position: fixed; bottom: 20px; right: 20px; z-index: 2147483647;
-      max-width: 420px; max-height: 300px; overflow-y: auto;
+      position: fixed; z-index: 2147483647;
+      top: ${top}px;
+      left: ${left}px;
+      width: ${popupW}px;
+      max-height: 280px; overflow-y: auto;
       background: #1a1a2e; color: #e0e0e0;
       padding: 14px 16px; border-radius: 10px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
@@ -163,10 +190,17 @@ function extractAndShowSummary() {
   
   const popup = document.createElement('div');
   popup.id = 'knexio-summary-popup';
+  
+  // Position: center of viewport, upper third
+  const top = Math.max(20, window.innerHeight * 0.15);
+  const left = Math.max(8, window.innerWidth / 2 - 220);
+  
   popup.innerHTML = `
     <div style="
-      position: fixed; bottom: 20px; right: 20px; z-index: 2147483647;
-      max-width: 440px; max-height: 360px; overflow-y: auto;
+      position: fixed; z-index: 2147483647;
+      top: ${top}px;
+      left: ${left}px;
+      width: 440px;
       background: #1a1a2e; color: #e0e0e0;
       padding: 14px 16px; border-radius: 10px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
