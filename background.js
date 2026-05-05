@@ -129,103 +129,101 @@ function extractAndShowSummary() {
   
   const title = document.title || '';
   const article = document.querySelector('article') || document.querySelector('main') || document.body;
-  const paragraphs = Array.from(article.querySelectorAll('p')).map(p => p.innerText.trim()).filter(t => t.length > 30);
+  const paragraphs = Array.from(article.querySelectorAll('p')).map(function(p) { return p.innerText.trim(); }).filter(function(t) { return t.length > 30; });
   
-  let summary;
+  var summary;
   if (!paragraphs.length) {
     summary = '页面内容较少，无法提取摘要';
   } else if (paragraphs.length <= 4) {
-    summary = '📄 ' + title + '\\n\\n' + paragraphs.join('\\n\\n');
+    summary = paragraphs.join('\n\n');
   } else {
-    // Split into sentences and score
-    const sentences = [];
-    paragraphs.forEach((p, i) => {
-      const parts = p.split(/(?<=[。！？.!?])\\s*/).filter(s => s.length > 10);
-      parts.forEach((s, j) => sentences.push({ text: s, paraIdx: i, posInPara: j }));
+    var sentences = [];
+    paragraphs.forEach(function(p, i) {
+      var parts = p.split(/(?<=[。！？.!?])\s*/).filter(function(s) { return s.length > 10; });
+      parts.forEach(function(s, j) { sentences.push({ text: s, paraIdx: i, posInPara: j }); });
     });
     
     if (sentences.length <= 5) {
-      summary = '📄 ' + title + '\\n\\n' + sentences.map(s => s.text).join(' ');
+      summary = sentences.map(function(s) { return s.text; }).join(' ');
     } else {
-      // Word frequency
-      const wordFreq = {};
-      sentences.forEach(s => {
-        s.text.split(/[，。！？,\\.!?\\s]+/).forEach(w => {
+      var wordFreq = {};
+      sentences.forEach(function(s) {
+        s.text.split(/[，。！？,.!?\s]+/).forEach(function(w) {
           if (w.length >= 3) wordFreq[w] = (wordFreq[w] || 0) + 1;
         });
       });
-      const totalSentences = sentences.length;
+      var totalSentences = sentences.length;
       
-      sentences.forEach((s, i) => {
-        let score = 2.0 / Math.sqrt(i / 2 + 1); // position
-        const len = s.text.length;
+      sentences.forEach(function(s, i) {
+        var score = 2.0 / Math.sqrt(i / 2 + 1);
+        var len = s.text.length;
         if (len > 40 && len < 150) score += 1.5;
         else if (len < 20 || len > 250) score -= 1;
         
-        const words = s.text.split(/[，。！？,\\.!?\\s]+/).filter(w => w.length >= 3);
-        let kwScore = 0;
-        words.forEach(w => {
+        var words = s.text.split(/[，。！？,.!?\s]+/).filter(function(w) { return w.length >= 3; });
+        var kwScore = 0;
+        words.forEach(function(w) {
           if (wordFreq[w] && wordFreq[w] > 1) kwScore += Math.min(wordFreq[w] / totalSentences * 5, 1);
         });
         score += kwScore / Math.max(words.length, 1) * 3;
         
         if (title) {
-          const tw = new Set(title.split(/[\\s]+/).filter(w => w.length >= 2));
-          words.forEach(w => { if (tw.has(w)) score += 0.5; });
+          var tw = title.split(/[\s]+/).filter(function(w) { return w.length >= 2; });
+          words.forEach(function(w) { if (tw.indexOf(w) >= 0) score += 0.5; });
         }
         s.score = score;
       });
       
-      const topN = Math.min(8, Math.max(4, Math.floor(sentences.length * 0.3)));
-      sentences.sort((a, b) => b.score - a.score);
-      const picked = sentences.slice(0, topN);
-      picked.sort((a, b) => a.paraIdx - b.paraIdx || a.posInPara - b.posInPara);
+      var topN = Math.min(8, Math.max(4, Math.floor(sentences.length * 0.3)));
+      sentences.sort(function(a, b) { return b.score - a.score; });
+      var picked = sentences.slice(0, topN);
+      picked.sort(function(a, b) { return a.paraIdx - b.paraIdx || a.posInPara - b.posInPara; });
       
-      summary = '📄 ' + title + '\\n\\n' + picked.map(s => s.text).join(' ');
+      summary = picked.map(function(s) { return s.text; }).join(' ');
     }
   }
   
-  // Copyable summary text
-  const escaped = summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+  var escaped = summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
   
-  const popup = document.createElement('div');
+  var top = Math.max(20, window.innerHeight * 0.15);
+  var left = Math.max(8, window.innerWidth / 2 - 220);
+  
+  var popup = document.createElement('div');
   popup.id = 'knexio-summary-popup';
-  
-  // Position: center of viewport, upper third
-  const top = Math.max(20, window.innerHeight * 0.15);
-  const left = Math.max(8, window.innerWidth / 2 - 220);
-  
-  popup.innerHTML = `
-    <div style="
-      position: fixed; z-index: 2147483647;
-      top: ${top}px;
-      left: ${left}px;
-      width: 440px;
-      background: #1a1a2e; color: #e0e0e0;
-      padding: 14px 16px; border-radius: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-      font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.7;
-      border: 1px solid #2a2a3e;
-    ">
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:#888">智能摘句 · 本页摘要</span>
-      </div>
-      <button id="knexio-close-summary" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
-      <div style="display:flex;gap:8px;margin-bottom:6px">
-          <button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">复制</button>
-        </div>
-      </div>
-      <div>${escaped}</div>
-    </div>
-  `;
+  popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:400px;overflow-y:auto;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e">' +
+    '<div style="margin-bottom:8px"><span style="font-size:11px;color:#888">智能摘句 · 本页摘要</span></div>' +
+    '<button id="knexio-close-summary" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>' +
+    '<div style="display:flex;gap:8px;margin-bottom:6px">' +
+      '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">复制</button>' +
+      '<button id="knexio-trans-summary" style="background:#2a2a3e;border:none;color:#e67e22;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">🌐 翻译</button>' +
+    '</div>' +
+    '<div id="knexio-summary-text">' + escaped + '</div>' +
+  '</div>';
   document.body.appendChild(popup);
   
-  const rawText = summary;
-  document.getElementById('knexio-copy-summary').onclick = () => {
-    navigator.clipboard.writeText(rawText);
-    const btn = document.getElementById('knexio-copy-summary');
-    if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => { if (btn) btn.textContent = '复制'; }, 1500); }
+  document.getElementById('knexio-close-summary').onclick = function() { popup.remove(); };
+  document.getElementById('knexio-copy-summary').onclick = function() {
+    navigator.clipboard.writeText(summary);
+    var btn = document.getElementById('knexio-copy-summary');
+    if (btn) { btn.textContent = '已复制 ✓'; setTimeout(function() { if (btn) btn.textContent = '复制'; }, 1500); }
   };
-  document.getElementById('knexio-close-summary').onclick = () => popup.remove();
-  setTimeout(() => { if (document.getElementById('knexio-summary-popup')) popup.remove(); }, 20000);
+  document.getElementById('knexio-trans-summary').onclick = async function() {
+    var btn = document.getElementById('knexio-trans-summary');
+    if (!btn || btn.textContent === '翻译中…') return;
+    btn.textContent = '翻译中…';
+    btn.style.color = '#888';
+    try {
+      var res = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=' + encodeURIComponent(summary));
+      var data = await res.json();
+      var translated = data[0].map(function(x) { return x[0]; }).join('');
+      var el = document.getElementById('knexio-summary-text');
+      if (el) el.innerHTML = '<div style="color:#e67e22;margin-bottom:4px;font-size:11px">翻译为中文 ↓</div>' + el.innerHTML + '<div style="border-top:1px solid #2a2a3e;margin-top:8px;padding-top:8px">' + translated.replace(/\n/g, '<br>') + '</div>';
+      btn.textContent = '已翻译';
+      setTimeout(function() { if (btn) btn.textContent = '🌐 翻译'; btn.style.color = '#e67e22'; }, 2000);
+    } catch(e) {
+      btn.textContent = '❌';
+      setTimeout(function() { if (btn) btn.textContent = '🌐 翻译'; btn.style.color = '#e67e22'; }, 1500);
+    }
+  };
+  setTimeout(function() { if (document.getElementById('knexio-summary-popup')) popup.remove(); }, 20000);
 }
