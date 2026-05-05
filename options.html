@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knexio 设置</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 22px; margin-bottom: 24px; color: #fff; }
+  h2 { font-size: 15px; margin: 24px 0 12px; color: #a0a0c0; }
+  .card {
+    background: #16213e;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #a0a0c0;
+  }
+  input[type="text"], input[type="password"], select {
+    width: 100%;
+    padding: 10px;
+    background: #0f1123;
+    border: 1px solid #2a2a4a;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  input:focus { outline:none; border-color:#e94560; }
+  button {
+    padding: 10px 20px;
+    background: #e94560;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:hover { background: #d63850; }
+  .hint {
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
+  }
+  .quota-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+  }
+  .quota-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4ade80;
+  }
+  .quota-number.empty { color: #ef4444; }
+  .success { color: #4ade80; font-size: 13px; margin-top: 8px; }
+  .error { color: #ef4444; font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>⚙️ Knexio 阅读伴侣 · 设置</h1>
+
+<div class="card">
+  <p style="font-size:14px;color:#e0e0e0;margin-bottom:4px"><strong>内置 AI 程序，安装即可正常使用。</strong></p>
+  <p style="font-size:13px;color:#888">翻译无限次免费，摘要每天 10 次本地智能提取。如需更强大的 AI 摘要能力，可自行配置 API Key。</p>
+</div>
+
+<div class="card">
+  <h2>📊 今日用量</h2>
+  <div class="quota-info">
+    <span>本地引擎剩余</span>
+    <span class="quota-number" id="quota-display">10</span>
+  </div>
+  <p class="hint">内置 AI 每天 10 次免费摘要，次日自动重置。翻译无限免费。</p>
+</div>
+
+<div class="card">
+  <h2>🔑 DeepSeek API Key（可选）</h2>
+  <label>填入后解锁更强大的 AI 摘要能力，不限次数</label>
+  <input type="password" id="api-key" placeholder="sk-xxxxxxxxxxxxxxxx">
+  <p class="hint">
+    获取 Key：<a href="https://platform.deepseek.com" target="_blank" style="color:#e94560">platform.deepseek.com</a>
+    · 白菜价，一条摘要不到一分钱
+  </p>
+  <button id="save-key">💾 保存</button>
+  <div id="save-msg"></div>
+</div>
+
+<div class="card">
+  <h2>🌐 默认翻译语言</h2>
+  <label>右键翻译的默认目标语言</label>
+  <select id="default-lang">
+    <option value="zh">中文</option>
+    <option value="en">English</option>
+    <option value="ja">日本語</option>
+    <option value="ko">한국어</option>
+  </select>
+  <button id="save-lang">💾 保存</button>
+</div>
+
+<div class="card">
+  <h2>📖 关于</h2>
+  <p style="font-size:13px;color:#888">
+    Knexio 阅读伴侣 v1.0<br>
+    隐私优先：所有文本仅在本地处理，不上传服务器。<br>
+    翻译使用 Google Translate API（匿名），摘要可选用你自己的 DeepSeek Key。<br>
+    <a href="https://knexio.xyz" target="_blank" style="color:#e94560">knexio.xyz</a>
+  </p>
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>
