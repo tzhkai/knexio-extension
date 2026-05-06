@@ -12,6 +12,8 @@ var _t = function(key) {
       popup_summary_title: '智能摘句 · 本页摘要',
       popup_original: '原文',
       popup_translated: '译文',
+      copy_orig: '复制原文',
+      copy_trans: '复制译文',
       copied: '已复制 ✓',
       copy: '复制',
       close: '✕',
@@ -29,6 +31,8 @@ var _t = function(key) {
       popup_summary_title: 'Smart Extract · Page Summary',
       popup_original: 'Original',
       popup_translated: 'Translation',
+      copy_orig: 'Copy Original',
+      copy_trans: 'Copy Translation',
       copied: 'Copied ✓',
       copy: 'Copy',
       close: '✕',
@@ -137,22 +141,23 @@ function showTranslationPopup(origText, translated, langLabel) {
       width: ${popupW}px;
       max-height: 400px; overflow-y: auto;
       background: #1a1a2e; color: #e0e0e0;
-      padding: 14px 16px; border-radius: 10px;
+      padding: 12px 14px; border-radius: 10px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
     ">
-      <button id="knexio-close-popup" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
-      <div style="margin-bottom:6px">
-        <span style="font-size:11px;color:#888">${_t('popup_original')}</span>
-        <button id="knexio-copy-orig" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;gap:6px">
+          <button id="knexio-copy-orig" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_orig')}</button>
+          <button id="knexio-copy-trans" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_trans')}</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:#888">${_t('popup_translate_title')} · ${langLabel}</span>
+          <button id="knexio-close-popup" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">✕</button>
+        </div>
       </div>
-      <div id="knexio-orig-text" style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #2a2a3e;color:#aaa">${escapedOrig}</div>
-      <div style="margin-bottom:6px">
-        <span style="font-size:11px;color:#888">${_t('popup_translated')} · ${langLabel}</span>
-        <button id="knexio-copy-trans" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
-      </div>
-      <div id="knexio-trans-text">${escapedTrans}</div>
+      <div id="knexio-orig-text" style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2a2a3e;color:#aaa;font-size:12px">${escapedOrig}</div>
+      <div id="knexio-trans-text" style="font-size:13px">${escapedTrans}</div>
     </div>
   `;
   document.body.appendChild(popup);
@@ -167,13 +172,13 @@ function showTranslationPopup(origText, translated, langLabel) {
   copyOrigBtn.onclick = function() {
     navigator.clipboard.writeText(origTextContent).then(function() {
       copyOrigBtn.textContent = _t('copied');
-      setTimeout(function() { copyOrigBtn.textContent = _t('copy'); }, 1500);
+      setTimeout(function() { copyOrigBtn.textContent = _t('copy_orig'); }, 1500);
     });
   };
   copyTransBtn.onclick = function() {
     navigator.clipboard.writeText(transTextContent).then(function() {
       copyTransBtn.textContent = _t('copied');
-      setTimeout(function() { copyTransBtn.textContent = _t('copy'); }, 1500);
+      setTimeout(function() { copyTransBtn.textContent = _t('copy_trans'); }, 1500);
     });
   };
   

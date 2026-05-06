@@ -5,8 +5,8 @@
 var _lang = (navigator.language || 'en').startsWith('zh') ? 'zh' : 'en';
 var _t = function(key) {
   var map = {
-    zh: { float_translate: '🔤 翻译', float_translating: '翻译中…', failed: '翻译失败', copy: '复制', copied: '已复制', original: '原文', translation: '译文' },
-    en: { float_translate: '🔤 Translate', float_translating: 'Translating…', failed: 'Translation failed', copy: 'Copy', copied: 'Copied', original: 'Original', translation: 'Translation' }
+    zh: { float_translate: '🔤 翻译', float_translating: '翻译中…', failed: '翻译失败', copy: '复制', copied: '已复制', copy_orig: '复制原文', copy_trans: '复制译文', original: '原文', translation: '译文' },
+    en: { float_translate: '🔤 Translate', float_translating: 'Translating…', failed: 'Translation failed', copy: 'Copy', copied: 'Copied', copy_orig: 'Copy Original', copy_trans: 'Copy Translation', original: 'Original', translation: 'Translation' }
   };
   return (map[_lang] || map.en)[key] || key;
 };
@@ -118,8 +118,8 @@ function showInlineTranslation(origText, translated, selRect, mouseY) {
   // Actual max height: clamp to available space
   const maxH = Math.min(popupH, fromBottom ? selRect.top - 16 : vh - selRect.bottom - 16);
 
-  var escapedOrig = origText.replace(/\n/g, '<br>');
-  var escapedTrans = translated.replace(/\n/g, '<br>');
+  var escapedOrig = origText.split('\n').join('<br>');
+  var escapedTrans = translated.split('\n').join('<br>');
   
   const div = document.createElement('div');
   div.id = 'knexio-inline-trans';
@@ -137,17 +137,15 @@ function showInlineTranslation(origText, translated, selRect, mouseY) {
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
     ">
-      <button id="knexio-close-inline" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
-      <div style="margin-bottom:4px">
-        <span style="font-size:11px;color:#888">${_t('original')}</span>
-        <button id="knexio-copy-orig-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;gap:6px">
+          <button id="knexio-copy-orig-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_orig')}</button>
+          <button id="knexio-copy-trans-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_trans')}</button>
+        </div>
+        <button id="knexio-close-inline" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">✕</button>
       </div>
-      <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a2a3e;color:#aaa">${escapedOrig}</div>
-      <div style="margin-bottom:4px">
-        <span style="font-size:11px;color:#888">${_t('translation')}</span>
-        <button id="knexio-copy-trans-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
-      </div>
-      <div style="padding-right:8px">${escapedTrans}</div>
+      <div id="knexio-orig-inline" style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a2a3e;color:#aaa;font-size:12px">${escapedOrig}</div>
+      <div id="knexio-trans-inline-text" style="font-size:13px">${escapedTrans}</div>
     </div>
   `;
   document.body.appendChild(div);
@@ -158,13 +156,13 @@ function showInlineTranslation(origText, translated, selRect, mouseY) {
   copyOrigBtn.onclick = function() {
     navigator.clipboard.writeText(origText).then(function() {
       copyOrigBtn.textContent = _t('copied');
-      setTimeout(function() { copyOrigBtn.textContent = _t('copy'); }, 1500);
+      setTimeout(function() { copyOrigBtn.textContent = _t('copy_orig'); }, 1500);
     });
   };
   copyTransBtn.onclick = function() {
     navigator.clipboard.writeText(translated).then(function() {
       copyTransBtn.textContent = _t('copied');
-      setTimeout(function() { copyTransBtn.textContent = _t('copy'); }, 1500);
+      setTimeout(function() { copyTransBtn.textContent = _t('copy_trans'); }, 1500);
     });
   };
   
