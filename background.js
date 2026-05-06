@@ -198,8 +198,8 @@ function extractAndShowSummary() {
   var _l = (navigator.language || 'en').startsWith('zh') ? 'zh' : 'en';
   var _tt = function(k) {
     var m = {
-      zh: { no_content: '页面内容较少，无法提取摘要', title: '智能摘句 · 本页摘要', copy: '复制', copied: '已复制 ✓', translate: '🌐 翻译', translating: '翻译中…', translated: '已翻译', original: '查看原文', fail: '❌' },
-      en: { no_content: 'Page has too little content to summarize', title: 'Smart Extract · Page Summary', copy: 'Copy', copied: 'Copied ✓', translate: '🌐 Translate', translating: 'Translating…', translated: 'Translated', original: 'Show Original', fail: '❌' }
+      zh: { no_content: '页面内容较少，无法提取摘要', title: '智能摘句 · 本页摘要', copy: '复制', copied: '已复制 ✓', copy_trans: '复制译文', translate: '🌐 翻译', translating: '翻译中…', translated: '已翻译', original: '查看原文', fail: '❌' },
+      en: { no_content: 'Page has too little content to summarize', title: 'Smart Extract · Page Summary', copy: 'Copy', copied: 'Copied ✓', copy_trans: 'Copy Translation', translate: '🌐 Translate', translating: 'Translating…', translated: 'Translated', original: 'Show Original', fail: '❌' }
     };
     return (m[_l] || m.en)[k] || k;
   };
