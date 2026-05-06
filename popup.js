@@ -341,9 +341,6 @@ document.getElementById('md-btn').addEventListener('click', async () => {
 
     md += results[0].result;
     
-    // Copy to clipboard
-    await navigator.clipboard.writeText(md);
-    
     // Open MarkdownMaster editor with content via URL param
     // URL-encode and truncate if too long (browser URL limit ~2000 chars)
     var urlText = md;
@@ -357,10 +354,17 @@ document.getElementById('md-btn').addEventListener('click', async () => {
     resultBox.textContent = truncated ? I18N.t('md_ok_long') : I18N.t('md_ok');
     resultBox.className = 'result-box success';
     
-    // Open MarkdownMaster editor
-    setTimeout(() => {
-      window.open(editorUrl, '_blank');
-    }, 400);
+    // Copy full content to clipboard (backup)
+    try { await navigator.clipboard.writeText(md); } catch(e) {}
+    
+    // Use chrome.tabs.create instead of window.open (avoids popup blocker)
+    // But first, try to inject content into an existing editor tab if one is open
+    chrome.tabs.create({ url: editorUrl, active: false }, function(newTab) {
+      // Tab opens in background with ?text= param — editor.js handles the prefill
+      setTimeout(() => {
+        try { chrome.tabs.update(newTab.id, { active: true }); } catch(e) {}
+      }, 600);
+    });
   } catch (e) {
     resultBox.textContent = I18N.t('md_fail');
     resultBox.className = 'result-box error';
