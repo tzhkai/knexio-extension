@@ -118,17 +118,21 @@ function showTranslationPopup(origText, translated, langLabel) {
     left = Math.max(8, Math.min(vw - popupW - 8, rect.left + rect.width / 2 - popupW / 2));
     
     // Show below selection if enough space; otherwise above
-    const popupH = 400;
+    var popupMaxH = 400;
+    var maxH;
     if (vh - rect.bottom - gap > 120) {
+      // Below
+      maxH = Math.min(popupMaxH, vh - rect.bottom - gap - 12);
       top = rect.bottom + gap;
     } else {
       // Above: popup bottom aligns to rect.top - gap
-      const availH = Math.min(popupH, rect.top - gap - 12);
-      top = Math.max(8, rect.top - gap - availH);
+      maxH = Math.min(popupMaxH, rect.top - gap - 12);
+      top = Math.max(8, rect.top - gap - maxH);
     }
   } else {
     // Fallback: center of viewport
-    top = window.innerHeight * 0.3;
+    maxH = Math.min(400, window.innerHeight * 0.65);
+    top = window.innerHeight * 0.15;
     left = Math.max(8, window.innerWidth / 2 - popupW / 2);
   }
   
@@ -142,7 +146,7 @@ function showTranslationPopup(origText, translated, langLabel) {
       top: ${top}px;
       left: ${left}px;
       width: ${popupW}px;
-      max-height: 400px;
+      max-height: ${maxH}px;
       background: #1a1a2e; color: #e0e0e0;
       padding: 12px 14px; border-radius: 10px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
@@ -277,10 +281,11 @@ function extractAndShowSummary() {
   
   var top = Math.max(20, Math.min(window.innerHeight * 0.15, window.innerHeight - 420));
   var left = Math.max(8, window.innerWidth / 2 - 220);
+  var smaxH = Math.min(400, window.innerHeight - top - 20);
   
   var popup = document.createElement('div');
   popup.id = 'knexio-summary-popup';
-  popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:400px;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e;display:flex;flex-direction:column">' +
+  popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:' + smaxH + 'px;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e;display:flex;flex-direction:column">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #2a2a3e;flex-shrink:0">' +
       '<div style="display:flex;gap:6px">' +
         '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">' + _tt('copy') + '</button>' +
