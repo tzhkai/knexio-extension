@@ -18,7 +18,8 @@ var _t = function(key) {
       summary_translate_btn: '🌐 翻译',
       translating: '翻译中…',
       translated: '已翻译',
-      summary_original_btn: '查看原文'
+      summary_original_btn: '查看原文',
+      copy_trans: '复制译文'
     },
     en: {
       ctx_translate: '🔤 Translate Selection',
@@ -34,7 +35,8 @@ var _t = function(key) {
       summary_translate_btn: '🌐 Translate',
       translating: 'Translating…',
       translated: 'Translated',
-      summary_original_btn: 'Show Original'
+      summary_original_btn: 'Show Original',
+      copy_trans: 'Copy Translation'
     }
   };
   return (map[_lang] || map.en)[key] || key;
@@ -260,7 +262,7 @@ function extractAndShowSummary() {
     }
   }
   
-  var escaped = summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+  var escaped = summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').split('\n').join('<br>');
   
   var top = Math.max(20, window.innerHeight * 0.15);
   var left = Math.max(8, window.innerWidth / 2 - 220);
@@ -268,11 +270,16 @@ function extractAndShowSummary() {
   var popup = document.createElement('div');
   popup.id = 'knexio-summary-popup';
   popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:400px;overflow-y:auto;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e">' +
-    '<div style="margin-bottom:8px"><span style="font-size:11px;color:#888">' + _tt('title') + '</span></div>' +
-    '<button id="knexio-close-summary" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>' +
-    '<div style="display:flex;gap:8px;margin-bottom:6px">' +
-      '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">' + _tt('copy') + '</button>' +
-      '<button id="knexio-trans-summary" style="background:#2a2a3e;border:none;color:#e67e22;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px">' + _tt('translate') + '</button>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+      '<div style="display:flex;gap:6px">' +
+        '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">' + _tt('copy') + '</button>' +
+        '<button id="knexio-copy-trans-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px;display:none">' + _tt('copy_trans') + '</button>' +
+        '<button id="knexio-trans-summary" style="background:#2a2a3e;border:none;color:#e67e22;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">' + _tt('translate') + '</button>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span style="font-size:11px;color:#888">' + _tt('title') + '</span>' +
+        '<button id="knexio-close-summary" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;padding:0 4px">✕</button>' +
+      '</div>' +
     '</div>' +
     '<div id="knexio-summary-text">' + escaped + '</div>' +
   '</div>';
@@ -284,6 +291,17 @@ function extractAndShowSummary() {
     var btn = document.getElementById('knexio-copy-summary');
     if (btn) { btn.textContent = _tt('copied'); setTimeout(function() { if (btn) btn.textContent = _tt('copy'); }, 1500); }
   };
+  
+  // Copy translation button
+  var transText = null;
+  document.getElementById('knexio-copy-trans-summary').onclick = function() {
+    if (transText) {
+      navigator.clipboard.writeText(transText);
+      var btn = document.getElementById('knexio-copy-trans-summary');
+      if (btn) { btn.textContent = _tt('copied'); setTimeout(function() { if (btn) btn.textContent = _tt('copy_trans'); }, 1500); }
+    }
+  };
+  
   document.getElementById('knexio-trans-summary').onclick = async function() {
     var btn = document.getElementById('knexio-trans-summary');
     if (!btn || btn.textContent === _tt('translating')) return;
@@ -294,7 +312,12 @@ function extractAndShowSummary() {
       var data = await res.json();
       var translated = data[0].map(function(x) { return x[0]; }).join('');
       var el = document.getElementById('knexio-summary-text');
-      if (el) el.innerHTML = '<div style="color:#e67e22;margin-bottom:4px;font-size:11px">翻译为中文 ↓</div>' + el.innerHTML + '<div style="border-top:1px solid #2a2a3e;margin-top:8px;padding-top:8px">' + translated.replace(/\n/g, '<br>') + '</div>';
+      var origHtml = el.innerHTML;
+      var transHtml = translated.split('\n').join('<br>');
+      transText = translated;
+      if (el) el.innerHTML = '<div style="color:#e67e22;margin-bottom:4px;font-size:11px">翻译为中文 ↓</div>' + origHtml + '<div style="border-top:1px solid #2a2a3e;margin-top:8px;padding-top:8px">' + transHtml + '</div>';
+      var copyTransBtn = document.getElementById('knexio-copy-trans-summary');
+      if (copyTransBtn) copyTransBtn.style.display = '';
       btn.textContent = _tt('translated');
       setTimeout(function() { if (btn) btn.textContent = _tt('translate'); btn.style.color = '#e67e22'; }, 2000);
     } catch(e) {
