@@ -123,10 +123,8 @@ function showTranslationPopup(origText, translated, langLabel) {
     left = Math.max(8, window.innerWidth / 2 - popupW / 2);
   }
   
-  const escapedOrig = origText.replace(/
-/g, '<br>');
-  const escapedTrans = translated.replace(/
-/g, '<br>');
+  const escapedOrig = origText.replace(/\n/g, '<br>');
+  const escapedTrans = translated.replace(/\n/g, '<br>');
   const popup = document.createElement('div');
   popup.id = 'knexio-translate-popup';
   popup.innerHTML = `
