@@ -18,6 +18,12 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    // 切换到 MD 标签时，如果已有摘要，改变提示
+    if (tab.dataset.tab === 'md' && summarizeOriginalText && summarizeOriginalText.trim()) {
+      var hint = document.getElementById('md-hint');
+      hint.textContent = I18N.t('md_hint_summary');
+      hint.style.color = '#4ade80';
+    }
   });
 });
 
@@ -273,6 +279,11 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   document.getElementById('md-title').textContent = tab.title;
   document.getElementById('md-url').textContent = tab.url;
+  // 如果已经生成了摘要，给个提示
+  if (summarizeOriginalText && summarizeOriginalText.trim()) {
+    document.getElementById('md-hint').textContent = I18N.t('md_hint_summary');
+    document.getElementById('md-hint').style.color = '#4ade80';
+  }
 })();
 
 document.getElementById('md-btn').addEventListener('click', async () => {
@@ -293,7 +304,14 @@ document.getElementById('md-btn').addEventListener('click', async () => {
       return;
     }
     
-    const md = '# ' + tab.title + '\n\n> ' + tab.url + '\n\n' + results[0].result;
+    let md = '# ' + tab.title + '\n\n> ' + tab.url + '\n\n';
+
+    // 如果有摘要，加到顶部
+    if (summarizeOriginalText && summarizeOriginalText.trim()) {
+      md += '## 页面摘要\n\n' + summarizeOriginalText.trim() + '\n\n---\n\n';
+    }
+
+    md += results[0].result;
     
     // Copy to clipboard
     await navigator.clipboard.writeText(md);

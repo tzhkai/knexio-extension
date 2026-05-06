@@ -55,6 +55,7 @@ const I18N = {
 
       // ── Save tab ──
       md_hint: '提取正文为 Markdown，免费在线编辑器打开 ✨',
+      md_hint_summary: '已检测到摘要 ✅ 将一并发送到编辑器',
       save_title_label: '标题',
       save_url_label: '链接',
       md_btn: '打开编辑器',
@@ -141,6 +142,7 @@ const I18N = {
 
       // ── Save tab ──
       md_hint: 'Extract page as Markdown, open in free online editor ✨',
+      md_hint_summary: 'Summary detected ✅ will be included',
       save_title_label: 'Title',
       save_url_label: 'URL',
       md_btn: 'Open Editor',
