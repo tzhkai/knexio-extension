@@ -10,6 +10,8 @@ var _t = function(key) {
       popup_translating: '翻译中…',
       popup_translate_title: '翻译选中文字',
       popup_summary_title: '智能摘句 · 本页摘要',
+      popup_original: '原文',
+      popup_translated: '译文',
       copied: '已复制 ✓',
       copy: '复制',
       close: '✕',
@@ -24,6 +26,8 @@ var _t = function(key) {
       popup_translating: 'Translating…',
       popup_translate_title: 'Translate Selection',
       popup_summary_title: 'Smart Extract · Page Summary',
+      popup_original: 'Original',
+      popup_translated: 'Translation',
       copied: 'Copied ✓',
       copy: 'Copy',
       close: '✕',
@@ -82,7 +86,7 @@ async function handleTranslateSelection(text, tab) {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: showTranslationPopup,
-      args: [translated, targetLang === 'en' ? 'English' : '中文']
+      args: [text, translated, targetLang === 'en' ? 'English' : '中文']
     });
   } catch (e) {
     console.error('Translation error:', e);
@@ -90,7 +94,7 @@ async function handleTranslateSelection(text, tab) {
 }
 
 // This function runs in the page context
-function showTranslationPopup(text, langLabel) {
+function showTranslationPopup(origText, translated, langLabel) {
   const existing = document.getElementById('knexio-translate-popup');
   if (existing) existing.remove();
   
@@ -119,6 +123,10 @@ function showTranslationPopup(text, langLabel) {
     left = Math.max(8, window.innerWidth / 2 - popupW / 2);
   }
   
+  const escapedOrig = origText.replace(/
+/g, '<br>');
+  const escapedTrans = translated.replace(/
+/g, '<br>');
   const popup = document.createElement('div');
   popup.id = 'knexio-translate-popup';
   popup.innerHTML = `
@@ -127,22 +135,48 @@ function showTranslationPopup(text, langLabel) {
       top: ${top}px;
       left: ${left}px;
       width: ${popupW}px;
-      max-height: 280px; overflow-y: auto;
+      max-height: 400px; overflow-y: auto;
       background: #1a1a2e; color: #e0e0e0;
       padding: 14px 16px; border-radius: 10px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
     ">
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:#888">${_t('popup_translate_title')}</span>
-      </div>
       <button id="knexio-close-popup" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
-      <div>${text.replace(/\n/g, '<br>')}</div>
+      <div style="margin-bottom:6px">
+        <span style="font-size:11px;color:#888">${_t('popup_original')}</span>
+        <button id="knexio-copy-orig" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
+      </div>
+      <div id="knexio-orig-text" style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #2a2a3e;color:#aaa">${escapedOrig}</div>
+      <div style="margin-bottom:6px">
+        <span style="font-size:11px;color:#888">${_t('popup_translated')} · ${langLabel}</span>
+        <button id="knexio-copy-trans" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
+      </div>
+      <div id="knexio-trans-text">${escapedTrans}</div>
     </div>
   `;
   document.body.appendChild(popup);
   document.getElementById('knexio-close-popup').onclick = () => popup.remove();
+  
+  // Copy buttons
+  var copyOrigBtn = document.getElementById('knexio-copy-orig');
+  var copyTransBtn = document.getElementById('knexio-copy-trans');
+  var origTextContent = origText;
+  var transTextContent = translated;
+  
+  copyOrigBtn.onclick = function() {
+    navigator.clipboard.writeText(origTextContent).then(function() {
+      copyOrigBtn.textContent = _t('copied');
+      setTimeout(function() { copyOrigBtn.textContent = _t('copy'); }, 1500);
+    });
+  };
+  copyTransBtn.onclick = function() {
+    navigator.clipboard.writeText(transTextContent).then(function() {
+      copyTransBtn.textContent = _t('copied');
+      setTimeout(function() { copyTransBtn.textContent = _t('copy'); }, 1500);
+    });
+  };
+  
   setTimeout(() => { if (document.getElementById('knexio-translate-popup')) popup.remove(); }, 15000);
 }
 

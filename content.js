@@ -5,8 +5,8 @@
 var _lang = (navigator.language || 'en').startsWith('zh') ? 'zh' : 'en';
 var _t = function(key) {
   var map = {
-    zh: { float_translate: '🔤 翻译', float_translating: '翻译中…', failed: '翻译失败' },
-    en: { float_translate: '🔤 Translate', float_translating: 'Translating…', failed: 'Translation failed' }
+    zh: { float_translate: '🔤 翻译', float_translating: '翻译中…', failed: '翻译失败', copy: '复制', copied: '已复制', original: '原文', translation: '译文' },
+    en: { float_translate: '🔤 Translate', float_translating: 'Translating…', failed: 'Translation failed', copy: 'Copy', copied: 'Copied', original: 'Original', translation: 'Translation' }
   };
   return (map[_lang] || map.en)[key] || key;
 };
@@ -60,7 +60,7 @@ document.addEventListener('mouseup', (e) => {
       
       // Position relative to selection, avoiding overlap
       const mouseY = e.clientY;
-      showInlineTranslation(translated, rect, mouseY);
+      showInlineTranslation(text, translated, rect, mouseY);
     } catch (e) {
       floatingBtn.innerHTML = '❌';
       setTimeout(() => { if (floatingBtn) floatingBtn.remove(); floatingBtn = null; }, 1000);
@@ -78,7 +78,7 @@ document.addEventListener('mousedown', (e) => {
   }
 });
 
-function showInlineTranslation(text, selRect, mouseY) {
+function showInlineTranslation(origText, translated, selRect, mouseY) {
   const existing = document.getElementById('knexio-inline-trans');
   if (existing) existing.remove();
 
@@ -118,6 +118,9 @@ function showInlineTranslation(text, selRect, mouseY) {
   // Actual max height: clamp to available space
   const maxH = Math.min(popupH, fromBottom ? selRect.top - 16 : vh - selRect.bottom - 16);
 
+  var escapedOrig = origText.replace(/\n/g, '<br>');
+  var escapedTrans = translated.replace(/\n/g, '<br>');
+  
   const div = document.createElement('div');
   div.id = 'knexio-inline-trans';
   div.innerHTML = `
@@ -134,14 +137,36 @@ function showInlineTranslation(text, selRect, mouseY) {
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
     ">
-      <div style="margin-bottom:6px">
-        <span style="font-size:11px;color:#888">翻译为中文</span>
-      </div>
       <button id="knexio-close-inline" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
-      <div style="padding-right:8px">${text.replace(/\n/g, '<br>')}</div>
+      <div style="margin-bottom:4px">
+        <span style="font-size:11px;color:#888">${_t('original')}</span>
+        <button id="knexio-copy-orig-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
+      </div>
+      <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a2a3e;color:#aaa">${escapedOrig}</div>
+      <div style="margin-bottom:4px">
+        <span style="font-size:11px;color:#888">${_t('translation')}</span>
+        <button id="knexio-copy-trans-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 6px;border-radius:3px;float:right">${_t('copy')}</button>
+      </div>
+      <div style="padding-right:8px">${escapedTrans}</div>
     </div>
   `;
   document.body.appendChild(div);
   document.getElementById('knexio-close-inline').onclick = () => div.remove();
+  
+  var copyOrigBtn = document.getElementById('knexio-copy-orig-inline');
+  var copyTransBtn = document.getElementById('knexio-copy-trans-inline');
+  copyOrigBtn.onclick = function() {
+    navigator.clipboard.writeText(origText).then(function() {
+      copyOrigBtn.textContent = _t('copied');
+      setTimeout(function() { copyOrigBtn.textContent = _t('copy'); }, 1500);
+    });
+  };
+  copyTransBtn.onclick = function() {
+    navigator.clipboard.writeText(translated).then(function() {
+      copyTransBtn.textContent = _t('copied');
+      setTimeout(function() { copyTransBtn.textContent = _t('copy'); }, 1500);
+    });
+  };
+  
   setTimeout(() => { if (document.getElementById('knexio-inline-trans')) div.remove(); }, 10000);
 }
