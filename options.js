@@ -25,7 +25,7 @@ chrome.storage.sync.get(['deepseek_api_key'], (items) => {
 saveKeyBtn.addEventListener('click', () => {
   const key = keyInput.value.trim();
   if (!key) {
-    keyStatus.textContent = '请输入 API Key';
+    keyStatus.textContent = I18N.t('options_enter_key') || '请输入 API Key';
     keyStatus.className = 'status warn';
     return;
   }
