@@ -61,6 +61,7 @@ const I18N = {
       md_btn: '打开编辑器',
       md_extracting: '提取中…',
       md_ok: '已复制 ✓ 即将打开编辑器',
+      md_ok_long: '已复制 ✓ 内容较长，打开后 Cmd+V 粘贴',
       md_fail: '提取失败，页面内容可能较少或受限制',
 
       // ── Content script (floating button) ──
@@ -148,6 +149,7 @@ const I18N = {
       md_btn: 'Open Editor',
       md_extracting: 'Extracting…',
       md_ok: 'Copied ✓ Opening editor…',
+      md_ok_long: 'Copied ✓ Content long — Cmd+V to paste',
       md_fail: 'Extraction failed. Page content may be too thin or restricted.',
 
       // ── Content script (floating button) ──

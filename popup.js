@@ -343,12 +343,23 @@ document.getElementById('md-btn').addEventListener('click', async () => {
     
     // Copy to clipboard
     await navigator.clipboard.writeText(md);
-    resultBox.textContent = I18N.t('md_ok');
+    
+    // Open MarkdownMaster editor with content via URL param
+    // URL-encode and truncate if too long (browser URL limit ~2000 chars)
+    var urlText = md;
+    var truncated = false;
+    if (urlText.length > 1500) {
+      urlText = urlText.substring(0, 1500) + '\n\n> ⚠️ 内容较长已截断，完整内容已复制到剪贴板，请 Cmd+V 粘贴';
+      truncated = true;
+    }
+    var editorUrl = 'https://markdownmaster.site/editor/?text=' + encodeURIComponent(urlText);
+    
+    resultBox.textContent = truncated ? I18N.t('md_ok_long') : I18N.t('md_ok');
     resultBox.className = 'result-box success';
     
     // Open MarkdownMaster editor
     setTimeout(() => {
-      window.open('https://markdownmaster.site/editor/', '_blank');
+      window.open(editorUrl, '_blank');
     }, 400);
   } catch (e) {
     resultBox.textContent = I18N.t('md_fail');
