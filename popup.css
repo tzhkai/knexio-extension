@@ -91,6 +91,13 @@ textarea:focus, .lang-select:focus { border-color: #4f8ff7; }
 }
 .result-box:empty { display: none; }
 .result-actions { margin-top: 8px; text-align: right; }
+.promo-bar {
+  margin-top: 10px; padding-top: 8px;
+  border-top: 1px solid #2a2a3e;
+  text-align: center; font-size: 11px; color: #64748b;
+}
+.promo-bar a { color: #4f8ff7; text-decoration: none; }
+.promo-bar a:hover { text-decoration: underline; }
 .copy-btn {
   padding: 4px 12px;
   background: #2a2a3e;

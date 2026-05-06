@@ -11,6 +11,31 @@ function applyI18n() {
 }
 applyI18n();
 
+// ── Daily toast: first popup open each day shows knexio promo ──
+(async () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const { lastToast } = await chrome.storage.local.get('lastToast');
+  if (lastToast !== today) {
+    await chrome.storage.local.set({ lastToast: today });
+    // Wait a beat then inject toast into active tab
+    setTimeout(async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && tab.id && tab.url && !tab.url.startsWith('chrome://')) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+            var toast = document.createElement('div');
+            toast.innerHTML = '🛠 <a href="https://knexio.xyz" target="_blank" style="color:#4f8ff7;font-weight:600">knexio.xyz</a> · 100+ 免费在线工具';
+            toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:2147483646;background:#1a1a2e;color:#e0e0e0;padding:10px 16px;border-radius:8px;font-size:13px;font-family:-apple-system,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #2a2a3e;transition:opacity 0.5s;opacity:1;pointer-events:auto';
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+          }
+        }).catch(() => {});
+      }
+    }, 800);
+  }
+})();
+
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -46,6 +71,7 @@ document.getElementById('translate-btn').addEventListener('click', async () => {
     const translated = data[0].map(x => x[0]).join('');
     resultBox.textContent = translated;
     actions.style.display = 'block';
+    document.getElementById('translate-promo').style.display = 'block';
   } catch (e) {
     resultBox.textContent = I18N.t('translate_failed') + ': ' + e.message;
   }
@@ -158,6 +184,7 @@ document.getElementById('summarize-btn').addEventListener('click', async () => {
     btn.textContent = I18N.t('summarize_btn');
     btn.disabled = false;
     document.getElementById('summarize-actions').style.display = 'block';
+    document.getElementById('summarize-promo').style.display = 'block';
   } catch (e) {
     resultBox.textContent = I18N.t('summarize_extract_fail') + ': ' + e.message;
     btn.textContent = I18N.t('summarize_btn');
@@ -217,6 +244,7 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
     btn.textContent = I18N.t('ai_summarize_btn');
     btn.disabled = false;
     document.getElementById('summarize-actions').style.display = 'block';
+    document.getElementById('summarize-promo').style.display = 'block';
     
   } catch (e) {
     resultBox.textContent = I18N.t('summarize_ai_fail') + ': ' + e.message;
