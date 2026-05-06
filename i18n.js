@@ -54,11 +54,12 @@ const I18N = {
       summarize_original_btn: '查看原文',
 
       // ── Save tab ──
-      md_hint: '提取当前页面正文为 Markdown，在 MarkdownMaster 打开继续编辑。',
+      md_hint: '提取正文为 Markdown，免费在线编辑器打开 ✨',
       save_title_label: '标题',
       save_url_label: '链接',
-      md_btn: '提取并打开编辑器',
-      md_ok: '已复制 Markdown ✓ 即将打开编辑器',
+      md_btn: '打开编辑器',
+      md_extracting: '提取中…',
+      md_ok: '已复制 ✓ 即将打开编辑器',
       md_fail: '提取失败，页面内容可能较少或受限制',
 
       // ── Content script (floating button) ──
@@ -139,10 +140,11 @@ const I18N = {
       summarize_original_btn: 'Show Original',
 
       // ── Save tab ──
-      md_hint: 'Extract page content as Markdown and open in MarkdownMaster editor.',
+      md_hint: 'Extract page as Markdown, open in free online editor ✨',
       save_title_label: 'Title',
       save_url_label: 'URL',
-      md_btn: 'Extract & Open Editor',
+      md_btn: 'Open Editor',
+      md_extracting: 'Extracting…',
       md_ok: 'Copied ✓ Opening editor…',
       md_fail: 'Extraction failed. Page content may be too thin or restricted.',
 

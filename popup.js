@@ -277,7 +277,7 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
 
 document.getElementById('md-btn').addEventListener('click', async () => {
   const resultBox = document.getElementById('md-result');
-  resultBox.textContent = '提取中…';
+  resultBox.textContent = I18N.t('md_extracting');
   resultBox.className = 'result-box';
   
   try {
