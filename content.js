@@ -98,25 +98,23 @@ function showInlineTranslation(origText, translated, selRect, mouseY) {
   const spaceBelow = vh - selRect.bottom - gap;
   const spaceAbove = selRect.top - gap;
   
-  let top, fromBottom;
+  let top, maxH;
   if (mouseY < selMid && spaceBelow > 120) {
     // Show below
     top = selRect.bottom + gap;
-    fromBottom = false;
+    maxH = Math.min(popupH, vh - top - 12);
   } else if (spaceAbove > 120) {
-    // Show above
-    top = selRect.top - gap;
-    fromBottom = true;
+    // Show above — popup bottom aligns to selRect.top - gap
+    maxH = Math.min(popupH, selRect.top - gap - 12);
+    top = selRect.top - gap - maxH;
   } else if (spaceBelow > 100) {
     top = selRect.bottom + gap;
-    fromBottom = false;
+    maxH = Math.min(popupH, vh - top - 12);
   } else {
-    top = selRect.top - gap;
-    fromBottom = true;
+    // Above as fallback
+    maxH = Math.min(popupH, Math.max(80, selRect.top - 12));
+    top = Math.max(8, selRect.top - gap - maxH);
   }
-  
-  // Actual max height: clamp to available space
-  const maxH = Math.min(popupH, fromBottom ? selRect.top - 16 : vh - selRect.bottom - 16);
 
   var escapedOrig = origText.split('\n').join('<br>');
   var escapedTrans = translated.split('\n').join('<br>');

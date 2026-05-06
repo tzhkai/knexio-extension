@@ -117,11 +117,14 @@ function showTranslationPopup(origText, translated, langLabel) {
     
     left = Math.max(8, Math.min(vw - popupW - 8, rect.left + rect.width / 2 - popupW / 2));
     
-    // Show below selection if space; otherwise above
+    // Show below selection if enough space; otherwise above
+    const popupH = 400;
     if (vh - rect.bottom - gap > 120) {
       top = rect.bottom + gap;
     } else {
-      top = Math.max(8, rect.top - gap);
+      // Above: popup bottom aligns to rect.top - gap
+      const availH = Math.min(popupH, rect.top - gap - 12);
+      top = Math.max(8, rect.top - gap - availH);
     }
   } else {
     // Fallback: center of viewport
@@ -272,7 +275,7 @@ function extractAndShowSummary() {
   
   var escaped = summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').split('\n').join('<br>');
   
-  var top = Math.max(20, window.innerHeight * 0.15);
+  var top = Math.max(20, Math.min(window.innerHeight * 0.15, window.innerHeight - 420));
   var left = Math.max(8, window.innerWidth / 2 - 220);
   
   var popup = document.createElement('div');
