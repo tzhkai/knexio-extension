@@ -10,7 +10,7 @@
 <div class="tabs">
   <button class="tab active" data-tab="translate" data-i18n="translate">📝 翻译</button>
   <button class="tab" data-tab="summarize" data-i18n="summarize">🤖 摘要</button>
-  <button class="tab" data-tab="save" data-i18n="save">💾 保存</button>
+  <button class="tab" data-tab="md" data-i18n="md_tab">📝 转 MD</button>
 </div>
 
 <div class="panel active" id="panel-translate">
@@ -47,14 +47,14 @@
   </div>
 </div>
 
-<div class="panel" id="panel-save">
-  <p class="hint" data-i18n="save_hint">快速保存当前页面到 Knexio 书签，需要先在 Knexio 登录。</p>
+<div class="panel" id="panel-md">
+  <p class="hint" data-i18n="md_hint">提取当前页面正文为 Markdown，在 MarkdownMaster 打开继续编辑。</p>
   <div class="save-info">
-    <div class="info-row"><span class="label" data-i18n="save_title_label">标题</span><span id="save-title">-</span></div>
-    <div class="info-row"><span class="label" data-i18n="save_url_label">链接</span><span id="save-url">-</span></div>
+    <div class="info-row"><span class="label" data-i18n="save_title_label">标题</span><span id="md-title">-</span></div>
+    <div class="info-row"><span class="label" data-i18n="save_url_label">链接</span><span id="md-url">-</span></div>
   </div>
-  <button id="save-btn" class="primary-btn" data-i18n="save_btn">保存到 Knexio</button>
-  <div id="save-result" class="result-box"></div>
+  <button id="md-btn" class="primary-btn" data-i18n="md_btn">提取并打开编辑器</button>
+  <div id="md-result" class="result-box"></div>
 </div>
 
 <div class="footer">
@@ -62,7 +62,7 @@
   <span class="sep">|</span>
   <a href="https://knexio.xyz" target="_blank">knexio.xyz</a>
   <span class="sep">|</span>
-  <span class="version">v1.3.0</span>
+  <span class="version">v1.8.0</span>
 </div>
 
 <script src="i18n.js"></script>

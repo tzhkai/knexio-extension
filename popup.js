@@ -268,17 +268,142 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
   }
 });
 
-// ── Save ──
+// ── Markdown 剪藏 ──
 (async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  document.getElementById('save-title').textContent = tab.title;
-  document.getElementById('save-url').textContent = tab.url;
+  document.getElementById('md-title').textContent = tab.title;
+  document.getElementById('md-url').textContent = tab.url;
 })();
 
-document.getElementById('save-btn').addEventListener('click', async () => {
-  const resultBox = document.getElementById('save-result');
-  resultBox.textContent = I18N.t('save_placeholder');
+document.getElementById('md-btn').addEventListener('click', async () => {
+  const resultBox = document.getElementById('md-result');
+  resultBox.textContent = '提取中…';
+  resultBox.className = 'result-box';
+  
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: extractPageAsMarkdown
+    });
+    
+    if (!results || !results[0] || !results[0].result) {
+      resultBox.textContent = I18N.t('md_fail');
+      resultBox.className = 'result-box error';
+      return;
+    }
+    
+    const md = '# ' + tab.title + '\n\n> ' + tab.url + '\n\n' + results[0].result;
+    
+    // Copy to clipboard
+    await navigator.clipboard.writeText(md);
+    resultBox.textContent = I18N.t('md_ok');
+    resultBox.className = 'result-box success';
+    
+    // Open MarkdownMaster editor
+    setTimeout(() => {
+      window.open('https://markdownmaster.site/editor/', '_blank');
+    }, 400);
+  } catch (e) {
+    resultBox.textContent = I18N.t('md_fail');
+    resultBox.className = 'result-box error';
+  }
 });
+
+// Page-context extraction (lightweight, no dependency)
+function extractPageAsMarkdown() {
+  var main = document.querySelector('article') ||
+             document.querySelector('[role="main"]') ||
+             document.querySelector('main') ||
+             document.querySelector('.post-content') ||
+             document.querySelector('.article-content') ||
+             document.querySelector('.entry-content') ||
+             document.querySelector('#content') ||
+             document.querySelector('.content');
+
+  if (!main) {
+    var body = document.body.cloneNode(true);
+    var remove = body.querySelectorAll('script, style, nav, header:not(article header), footer, aside, .sidebar, .nav, .menu, .ad, .advertisement, [class*="comment"], .related, .recommend, .share, .social');
+    remove.forEach(function(el) { el.remove(); });
+    main = body;
+  }
+
+  var clone = main.cloneNode(true);
+  var junk = clone.querySelectorAll('script, style, noscript, iframe, form, input, button, select, textarea, [style*="display:none"], [hidden], [aria-hidden="true"], .hidden, .sr-only, nav, .nav, .sidebar, .footer-nav');
+  junk.forEach(function(el) { el.remove(); });
+
+  function htmlToMd(el) {
+    var out = '';
+    function walk(n) {
+      if (n.nodeType === 3) { var t = n.textContent; if (t.trim()) out += t; return; }
+      if (n.nodeType !== 1) return;
+      var tag = n.tagName.toLowerCase();
+      var children = n.childNodes;
+      var txt = (n.textContent || '').trim();
+      var hasImg = n.querySelector('img');
+      if (!txt && !hasImg) return;
+      switch (tag) {
+        case 'h1': out += '\n\n# '; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'h2': out += '\n\n## '; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'h3': out += '\n\n### '; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'h4': out += '\n\n#### '; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'h5': out += '\n\n##### '; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'p': out += '\n\n'; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'br': out += '\n'; break;
+        case 'hr': out += '\n\n---\n\n'; break;
+        case 'strong': case 'b': out += '**'; Array.from(children).forEach(walk); out += '**'; break;
+        case 'em': case 'i': out += '*'; Array.from(children).forEach(walk); out += '*'; break;
+        case 'code':
+          if (n.parentNode && n.parentNode.tagName === 'PRE') { out += n.textContent; return; }
+          out += '`' + n.textContent + '`'; return;
+        case 'pre':
+          var ce = n.querySelector('code');
+          var lang = '';
+          if (ce) { var m = (ce.className||'').match(/language-(\w+)/); if (m) lang = m[1]; }
+          out += '\n\n```' + lang + '\n' + (ce ? ce.textContent : n.textContent) + '\n```\n\n';
+          return;
+        case 'a':
+          var href = n.getAttribute('href') || '';
+          if (!href || href.startsWith('javascript:') || href === '#') {
+            Array.from(children).forEach(walk); return;
+          }
+          if (href.startsWith('/')) href = window.location.origin + href;
+          else if (!href.startsWith('http')) href = window.location.origin + '/' + href;
+          out += '[' + (n.textContent||'').trim() + '](' + href + ')';
+          return;
+        case 'img':
+          var alt = n.getAttribute('alt') || '';
+          var src = n.getAttribute('src') || n.getAttribute('data-src') || '';
+          if (src && !src.startsWith('data:')) {
+            if (src.startsWith('/')) src = window.location.origin + src;
+            else if (!src.startsWith('http')) src = window.location.origin + '/' + src;
+            out += '\n\n![' + alt + '](' + src + ')\n\n';
+          }
+          return;
+        case 'blockquote': out += '\n\n> '; Array.from(children).forEach(walk); out += '\n\n'; break;
+        case 'ul': out += '\n'; Array.from(children).forEach(function(li) { if (li.tagName === 'LI') { out += '- '; Array.from(li.childNodes).forEach(walk); out += '\n'; } }); out += '\n'; return;
+        case 'ol': out += '\n'; var idx2 = 1; Array.from(children).forEach(function(li) { if (li.tagName === 'LI') { out += (idx2++) + '. '; Array.from(li.childNodes).forEach(walk); out += '\n'; } }); out += '\n'; return;
+        case 'li': return;
+        case 'table':
+          var rows = n.querySelectorAll('tr');
+          out += '\n\n';
+          rows.forEach(function(r, ri) {
+            var cells = r.querySelectorAll('td, th');
+            out += '| ' + Array.from(cells).map(function(c) { return (c.textContent||'').trim().replace(/\|/g,'\\|'); }).join(' | ') + ' |\n';
+            if (ri === 0) out += '| ' + Array.from(cells).map(function() { return '---'; }).join(' | ') + ' |\n';
+          });
+          return;
+        case 'div': case 'section': case 'span': case 'article': case 'header': case 'footer': case 'main':
+          Array.from(children).forEach(walk); break;
+        default: Array.from(children).forEach(walk);
+      }
+    }
+    walk(el);
+    return out.replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '').replace(/\n+$/, '\n').trim();
+  }
+
+  return htmlToMd(clone);
+}
 
 // ── Copy buttons ──
 document.querySelectorAll('.copy-btn[data-target]').forEach(btn => {

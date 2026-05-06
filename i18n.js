@@ -14,7 +14,7 @@ const I18N = {
       app_name: 'Knexio 阅读伴侣',
       translate: '📝 翻译',
       summarize: '🤖 摘要',
-      save: '💾 保存',
+      md_tab: '📝 转 MD',
       settings: '⚙️ 设置',
       copy: '复制',
       copied: '已复制 ✓',
@@ -54,11 +54,12 @@ const I18N = {
       summarize_original_btn: '查看原文',
 
       // ── Save tab ──
-      save_hint: '快速保存当前页面到 Knexio 书签，需要先在 Knexio 登录。',
+      md_hint: '提取当前页面正文为 Markdown，在 MarkdownMaster 打开继续编辑。',
       save_title_label: '标题',
       save_url_label: '链接',
-      save_btn: '保存到 Knexio',
-      save_placeholder: '保存到 Knexio 功能需要后端支持，当前为占位。可通过 knexio.xyz 手动添加书签。',
+      md_btn: '提取并打开编辑器',
+      md_ok: '已复制 Markdown ✓ 即将打开编辑器',
+      md_fail: '提取失败，页面内容可能较少或受限制',
 
       // ── Content script (floating button) ──
       float_translate: '🔤 翻译',
@@ -98,7 +99,7 @@ const I18N = {
       app_name: 'Knexio Companion',
       translate: '📝 Translate',
       summarize: '🤖 Summary',
-      save: '💾 Save',
+      md_tab: '📝 To MD',
       settings: '⚙️ Settings',
       copy: 'Copy',
       copied: 'Copied ✓',
@@ -138,11 +139,12 @@ const I18N = {
       summarize_original_btn: 'Show Original',
 
       // ── Save tab ──
-      save_hint: 'Quick-save current page to Knexio bookmarks. Requires Knexio login.',
+      md_hint: 'Extract page content as Markdown and open in MarkdownMaster editor.',
       save_title_label: 'Title',
       save_url_label: 'URL',
-      save_btn: 'Save to Knexio',
-      save_placeholder: 'Save to Knexio requires backend support (placeholder). You can manually bookmark at knexio.xyz.',
+      md_btn: 'Extract & Open Editor',
+      md_ok: 'Copied ✓ Opening editor…',
+      md_fail: 'Extraction failed. Page content may be too thin or restricted.',
 
       // ── Content script (floating button) ──
       float_translate: '🔤 Translate',
