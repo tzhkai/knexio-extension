@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Knexio 阅读伴侣",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "翻译+智能摘句，安装即用。可选配 DeepSeek API 解锁 AI 深度总结，隐私优先不偷数据。",
   "icons": {
     "16": "icons/icon16.png",

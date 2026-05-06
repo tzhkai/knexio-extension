@@ -139,14 +139,15 @@ function showTranslationPopup(origText, translated, langLabel) {
       top: ${top}px;
       left: ${left}px;
       width: ${popupW}px;
-      max-height: 400px; overflow-y: auto;
+      max-height: 400px;
       background: #1a1a2e; color: #e0e0e0;
       padding: 12px 14px; border-radius: 10px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
+      display: flex; flex-direction: column;
     ">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #2a2a3e;flex-shrink:0">
         <div style="display:flex;gap:6px">
           <button id="knexio-copy-orig" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_orig')}</button>
           <button id="knexio-copy-trans" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_trans')}</button>
@@ -156,8 +157,10 @@ function showTranslationPopup(origText, translated, langLabel) {
           <button id="knexio-close-popup" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">✕</button>
         </div>
       </div>
-      <div id="knexio-orig-text" style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2a2a3e;color:#aaa;font-size:12px">${escapedOrig}</div>
-      <div id="knexio-trans-text" style="font-size:13px">${escapedTrans}</div>
+      <div id="knexio-popup-body" style="overflow-y:auto;padding-top:8px;flex:1">
+        <div id="knexio-orig-text" style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2a2a3e;color:#aaa;font-size:12px">${escapedOrig}</div>
+        <div id="knexio-trans-text" style="font-size:13px">${escapedTrans}</div>
+      </div>
     </div>
   `;
   document.body.appendChild(popup);
@@ -274,8 +277,8 @@ function extractAndShowSummary() {
   
   var popup = document.createElement('div');
   popup.id = 'knexio-summary-popup';
-  popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:400px;overflow-y:auto;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+  popup.innerHTML = '<div style="position:fixed;z-index:2147483647;top:' + top + 'px;left:' + left + 'px;width:440px;max-height:400px;background:#1a1a2e;color:#e0e0e0;padding:14px 16px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.5);font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;border:1px solid #2a2a3e;display:flex;flex-direction:column">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #2a2a3e;flex-shrink:0">' +
       '<div style="display:flex;gap:6px">' +
         '<button id="knexio-copy-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">' + _tt('copy') + '</button>' +
         '<button id="knexio-copy-trans-summary" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px;display:none">' + _tt('copy_trans') + '</button>' +
@@ -286,7 +289,7 @@ function extractAndShowSummary() {
         '<button id="knexio-close-summary" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;padding:0 4px">✕</button>' +
       '</div>' +
     '</div>' +
-    '<div id="knexio-summary-text">' + escaped + '</div>' +
+    '<div id="knexio-summary-body" style="overflow-y:auto;padding-top:8px;flex:1"><div id="knexio-summary-text">' + escaped + '</div></div>' +
   '</div>';
   document.body.appendChild(popup);
   

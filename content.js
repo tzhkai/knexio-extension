@@ -130,22 +130,24 @@ function showInlineTranslation(origText, translated, selRect, mouseY) {
       left: ${left}px;
       width: ${popupW}px;
       max-height: ${Math.max(60, maxH)}px;
-      overflow-y: auto;
       background: #1a1a2e; color: #e0e0e0;
       padding: 10px 14px; border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.6;
       border: 1px solid #2a2a3e;
+      display: flex; flex-direction: column;
     ">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;border-bottom:1px solid #2a2a3e;flex-shrink:0">
         <div style="display:flex;gap:6px">
           <button id="knexio-copy-orig-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_orig')}</button>
           <button id="knexio-copy-trans-inline" style="background:#2a2a3e;border:none;color:#aaa;cursor:pointer;font-size:10px;padding:2px 8px;border-radius:4px">${_t('copy_trans')}</button>
         </div>
         <button id="knexio-close-inline" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">✕</button>
       </div>
-      <div id="knexio-orig-inline" style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a2a3e;color:#aaa;font-size:12px">${escapedOrig}</div>
-      <div id="knexio-trans-inline-text" style="font-size:13px">${escapedTrans}</div>
+      <div id="knexio-inline-body" style="overflow-y:auto;padding-top:6px;flex:1">
+        <div id="knexio-orig-inline" style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a2a3e;color:#aaa;font-size:12px">${escapedOrig}</div>
+        <div id="knexio-trans-inline-text" style="font-size:13px">${escapedTrans}</div>
+      </div>
     </div>
   `;
   document.body.appendChild(div);
