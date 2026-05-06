@@ -135,7 +135,7 @@ function showTranslationPopup(text, langLabel) {
       border: 1px solid #2a2a3e;
     ">
       <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:#888">' + _t('popup_translate_title') + '</span>
+        <span style="font-size:11px;color:#888">${_t('popup_translate_title')}</span>
       </div>
       <button id="knexio-close-popup" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#888;cursor:pointer;font-size:14px;line-height:1">✕</button>
       <div>${text.replace(/\n/g, '<br>')}</div>
