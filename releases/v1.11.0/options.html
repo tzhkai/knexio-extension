@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="options_title">Knexio 阅读伴侣 — 设置</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+.container { width: 100%; max-width: 520px; }
+h1 { font-size: 22px; margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: #888; margin-bottom: 30px; }
+.section { background: #12121f; border: 1px solid #2a2a3e; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+.section h2 { font-size: 15px; margin-bottom: 12px; }
+.section p { font-size: 12px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+label { font-size: 12px; color: #aaa; display: block; margin-bottom: 6px; }
+input[type="text"], input[type="password"] {
+  width: 100%; padding: 10px 12px; background: #1a1a2e; color: #e0e0e0;
+  border: 1px solid #2a2a3e; border-radius: 6px; font-size: 13px; outline: none; margin-bottom: 10px;
+}
+input:focus { border-color: #4f8ff7; }
+.row { display: flex; gap: 8px; align-items: center; }
+.btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; }
+.btn-primary { background: #4f8ff7; color: #fff; }
+.btn-primary:hover { background: #3a7be8; }
+.btn-danger { background: #c0392b; color: #fff; }
+.btn-danger:hover { background: #a93226; }
+.btn-small { padding: 6px 14px; font-size: 12px; }
+.status { font-size: 12px; margin-top: 6px; }
+.status.ok { color: #27ae60; }
+.status.warn { color: #f39c12; }
+hr { border: none; border-top: 1px solid #2a2a3e; margin: 20px 0; }
+.footer { text-align: center; font-size: 11px; color: #555; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 data-i18n="options_title">⚙️ Knexio 阅读伴侣</h1>
+  <p class="subtitle" data-i18n="options_api_key_hint">隐私优先。所有数据本地处理，翻译走 Google，摘要可选配 DeepSeek。</p>
+
+  <div class="section">
+    <h2>🔑 <span data-i18n="options_api_key">DeepSeek API Key</span></h2>
+    <p data-i18n="options_api_key_hint">获取 API Key：platform.deepseek.com → API Keys → 创建，新用户免费 500 万 tokens</p>
+    <input type="password" id="api-key-input" placeholder="sk-xxxxxxxxxxxxxxxx">
+    <div class="row" style="margin-top:4px">
+      <button class="btn btn-primary" id="save-key" data-i18n="options_save">保存</button>
+      <button class="btn btn-danger btn-small" id="clear-key" data-i18n="options_clear">清除</button>
+    </div>
+    <div class="status" id="key-status"></div>
+  </div>
+
+  <div class="section">
+    <h2>🌐 <span data-i18n="options_default_lang">默认翻译语言</span></h2>
+    <select id="default-lang" style="width:100%;padding:10px;background:#1a1a2e;color:#e0e0e0;border:1px solid #2a2a3e;border-radius:6px;font-size:13px;outline:none">
+      <option value="zh-CN" data-i18n="lang_zh">中文（简体）</option>
+      <option value="en" data-i18n="lang_en">English</option>
+      <option value="ja" data-i18n="lang_ja">日本語</option>
+      <option value="ko" data-i18n="lang_ko">한국어</option>
+      <option value="fr" data-i18n="lang_fr">Français</option>
+      <option value="de" data-i18n="lang_de">Deutsch</option>
+      <option value="es" data-i18n="lang_es">Español</option>
+      <option value="ru" data-i18n="lang_ru">Русский</option>
+    </select>
+    <button class="btn btn-primary" id="save-lang" style="margin-top:10px" data-i18n="options_save">保存</button>
+  </div>
+
+  <div class="section">
+    <h2>💡 <span data-i18n="options_usage">使用说明</span></h2>
+    <p data-i18n="options_usage_text"></p>
+  </div>
+
+  <div class="footer">
+    <span data-i18n="app_name">Knexio 阅读伴侣</span> <span data-i18n="options_version">v1.3</span> · <a href="https://knexio.xyz" target="_blank" style="color:#555">knexio.xyz</a>
+  </div>
+</div>
+
+<script src="i18n.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

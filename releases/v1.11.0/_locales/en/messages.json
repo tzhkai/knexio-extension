@@ -1,0 +1,306 @@
+{
+  "extensionName": {
+    "message": "Knexio Companion",
+    "description": "Extension name"
+  },
+  "extensionDesc": {
+    "message": "Translate + smart extract, ready to use. Optional DeepSeek API for AI summary. Privacy-first, no data collection.",
+    "description": "Extension description"
+  },
+  "app_name": {
+    "message": "Knexio Companion",
+    "description": "App name in UI"
+  },
+  "translate": {
+    "message": "📝 Translate",
+    "description": "Translate tab"
+  },
+  "summarize": {
+    "message": "🤖 Summary",
+    "description": "Summary tab"
+  },
+  "md_tab": {
+    "message": "📝 To MD",
+    "description": "Markdown tab"
+  },
+  "settings": {
+    "message": "⚙️ Settings",
+    "description": "Settings link"
+  },
+  "copy": {
+    "message": "Copy",
+    "description": "Copy button"
+  },
+  "copied": {
+    "message": "Copied ✓",
+    "description": "Copied status"
+  },
+  "close": {
+    "message": "✕",
+    "description": "Close button"
+  },
+  "translate_btn": {
+    "message": "Translate",
+    "description": "Translate button"
+  },
+  "translating": {
+    "message": "Translating…",
+    "description": "Translating status"
+  },
+  "translated": {
+    "message": "Translated",
+    "description": "Translated status"
+  },
+  "translate_failed": {
+    "message": "Translation failed",
+    "description": "Translate error"
+  },
+  "translate_to_zh": {
+    "message": "to 中文",
+    "description": "Translate to Chinese option"
+  },
+  "translate_to_en": {
+    "message": "to English",
+    "description": "Translate to English option"
+  },
+  "translate_to_ja": {
+    "message": "to 日本語",
+    "description": "Translate to Japanese option"
+  },
+  "translate_to_ko": {
+    "message": "to 한국어",
+    "description": "Translate to Korean option"
+  },
+  "translate_to_fr": {
+    "message": "to Français",
+    "description": "Translate to French option"
+  },
+  "translate_to_de": {
+    "message": "to Deutsch",
+    "description": "Translate to German option"
+  },
+  "translate_to_es": {
+    "message": "to Español",
+    "description": "Translate to Spanish option"
+  },
+  "translate_to_ru": {
+    "message": "to Русский",
+    "description": "Translate to Russian option"
+  },
+  "translate_input_hint": {
+    "message": "Type text, or select text on page and right-click...",
+    "description": "Translate input placeholder"
+  },
+  "copy_result": {
+    "message": "Copy Result",
+    "description": "Copy result button"
+  },
+  "summarize_ready": {
+    "message": "Smart Extract ready",
+    "description": "Summarize status ready"
+  },
+  "summarize_ready_ai": {
+    "message": "Smart Extract ready · AI Summary unlocked",
+    "description": "Summarize status with AI"
+  },
+  "summarize_ready_no_ai": {
+    "message": "Smart Extract ready · Add DeepSeek key for AI summary",
+    "description": "Summarize status without AI"
+  },
+  "summarize_hint": {
+    "message": "Right-click anywhere on page →「✂️ Smart Extract」or click below. Add DeepSeek key for AI-powered summary.",
+    "description": "Summarize hint text"
+  },
+  "summarize_btn": {
+    "message": "Smart Extract",
+    "description": "Summarize button"
+  },
+  "ai_summarize_btn": {
+    "message": "✨ AI Summary",
+    "description": "AI summarize button"
+  },
+  "summarize_analyzing": {
+    "message": "⏳ Analyzing page...",
+    "description": "Analyzing page status"
+  },
+  "summarize_no_content": {
+    "message": "Page has too little content to summarize",
+    "description": "No content to summarize"
+  },
+  "summarize_extract_fail": {
+    "message": "Extract failed",
+    "description": "Extract failed"
+  },
+  "summarize_ai_thinking": {
+    "message": "⏳ AI thinking...",
+    "description": "AI thinking status"
+  },
+  "summarize_ai_no_content": {
+    "message": "Page has too little content for AI summary",
+    "description": "No content for AI summary"
+  },
+  "summarize_ai_no_key": {
+    "message": "Please add your DeepSeek API Key in Settings",
+    "description": "No API key message"
+  },
+  "summarize_ai_fail": {
+    "message": "AI summary failed",
+    "description": "AI summary failed"
+  },
+  "summarize_translate_btn": {
+    "message": "🌐 Translate",
+    "description": "Translate summary button"
+  },
+  "summarize_original_btn": {
+    "message": "Show Original",
+    "description": "Show original button"
+  },
+  "md_hint": {
+    "message": "Extract page as Markdown, open in free online editor ✨",
+    "description": "MD hint text"
+  },
+  "md_hint_summary": {
+    "message": "Summary detected ✅ will be included",
+    "description": "MD hint with summary"
+  },
+  "save_title_label": {
+    "message": "Title",
+    "description": "Title label"
+  },
+  "save_url_label": {
+    "message": "URL",
+    "description": "URL label"
+  },
+  "md_btn": {
+    "message": "Open Editor",
+    "description": "Open editor button"
+  },
+  "md_extracting": {
+    "message": "Extracting…",
+    "description": "Extracting status"
+  },
+  "md_ok": {
+    "message": "Copied ✓ Opening editor…",
+    "description": "MD extract success"
+  },
+  "md_ok_long": {
+    "message": "Copied ✓ Content long — Cmd+V to paste",
+    "description": "MD extract success long content"
+  },
+  "md_fail": {
+    "message": "Extraction failed. Page content may be too thin or restricted.",
+    "description": "MD extract failed"
+  },
+  "float_translate": {
+    "message": "🔤 Translate",
+    "description": "Floating translate button"
+  },
+  "float_translating": {
+    "message": "Translating…",
+    "description": "Floating translating status"
+  },
+  "ctx_translate": {
+    "message": "🔤 Translate Selection",
+    "description": "Context menu translate"
+  },
+  "ctx_summarize": {
+    "message": "✂️ Smart Extract (Page)",
+    "description": "Context menu summarize"
+  },
+  "popup_translating": {
+    "message": "Translating…",
+    "description": "Popup translating"
+  },
+  "popup_translate_title": {
+    "message": "Translate Selection",
+    "description": "Popup translate title"
+  },
+  "popup_summary_title": {
+    "message": "Smart Extract · Page Summary",
+    "description": "Popup summary title"
+  },
+  "options_title": {
+    "message": "Knexio Companion — Settings",
+    "description": "Options page title"
+  },
+  "options_api_key": {
+    "message": "DeepSeek API Key",
+    "description": "API key label"
+  },
+  "options_api_key_hint": {
+    "message": "Get your key: platform.deepseek.com → API Keys → Create. New users get 5M free tokens.",
+    "description": "API key hint"
+  },
+  "options_save": {
+    "message": "Save",
+    "description": "Save button"
+  },
+  "options_clear": {
+    "message": "Clear",
+    "description": "Clear button"
+  },
+  "options_saved": {
+    "message": "Saved",
+    "description": "Saved status"
+  },
+  "options_enter_key": {
+    "message": "Please enter an API Key",
+    "description": "Enter API key prompt"
+  },
+  "options_default_lang": {
+    "message": "Default Target Language",
+    "description": "Default language label"
+  },
+  "options_usage": {
+    "message": "Usage",
+    "description": "Usage section title"
+  },
+  "options_usage_text": {
+    "message": "Select text on any page and right-click to translate or extract a summary. Click the toolbar icon for full features. AI summary requires a DeepSeek API Key.",
+    "description": "Usage instructions"
+  },
+  "options_version": {
+    "message": "Version",
+    "description": "Version label"
+  },
+  "lang_zh": {
+    "message": "Chinese (Simplified)",
+    "description": "Chinese language option"
+  },
+  "lang_en": {
+    "message": "English",
+    "description": "English language option"
+  },
+  "lang_ja": {
+    "message": "Japanese",
+    "description": "Japanese language option"
+  },
+  "lang_ko": {
+    "message": "Korean",
+    "description": "Korean language option"
+  },
+  "lang_fr": {
+    "message": "French",
+    "description": "French language option"
+  },
+  "lang_de": {
+    "message": "German",
+    "description": "German language option"
+  },
+  "lang_es": {
+    "message": "Spanish",
+    "description": "Spanish language option"
+  },
+  "lang_ru": {
+    "message": "Russian",
+    "description": "Russian language option"
+  },
+  "translate_too_long": {
+    "message": "Text too long, max 5000 characters",
+    "description": "Text too long error"
+  },
+  "promo_text": {
+    "message": "100+ free online tools",
+    "description": "Promo bar text"
+  }
+}

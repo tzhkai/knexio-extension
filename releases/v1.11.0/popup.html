@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=360">
+<title data-i18n="app_name">Knexio 阅读伴侣</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<div class="tabs">
+  <button class="tab active" data-tab="translate" data-i18n="translate">📝 翻译</button>
+  <button class="tab" data-tab="summarize" data-i18n="summarize">🤖 摘要</button>
+  <button class="tab" data-tab="md" data-i18n="md_tab">📝 转 MD</button>
+</div>
+
+<div class="panel active" id="panel-translate">
+  <select id="translate-to" class="lang-select">
+    <option value="zh-CN" data-i18n="translate_to_zh">翻译成 中文</option>
+    <option value="en" data-i18n="translate_to_en">翻译成 English</option>
+    <option value="ja" data-i18n="translate_to_ja">翻译成 日本語</option>
+    <option value="ko" data-i18n="translate_to_ko">翻译成 한국어</option>
+    <option value="fr" data-i18n="translate_to_fr">翻译成 Français</option>
+    <option value="de" data-i18n="translate_to_de">翻译成 Deutsch</option>
+    <option value="es" data-i18n="translate_to_es">翻译成 Español</option>
+    <option value="ru" data-i18n="translate_to_ru">翻译成 Русский</option>
+  </select>
+  <textarea id="translate-input" data-i18n-placeholder="translate_input_hint" placeholder="输入文字，或选中网页文字后点右键翻译..."></textarea>
+  <button id="translate-btn" class="primary-btn" data-i18n="translate_btn">翻译</button>
+  <div id="translate-result" class="result-box"></div>
+  <div class="result-actions" id="translate-actions" style="display:none">
+    <button class="copy-btn" data-target="translate-result" data-i18n="copy_result">复制结果</button>
+  </div>
+  <div class="promo-bar" id="translate-promo" style="display:none">
+    <span>🛠 <a href="https://knexio.xyz" target="_blank">knexio.xyz</a> · 100+ 免费在线工具</span>
+  </div>
+</div>
+
+<div class="panel" id="panel-summarize">
+  <div id="summarize-status" class="status-line">
+    <span class="status-icon">🟡</span> <span data-i18n="summarize_ready">智能摘句就绪</span>
+  </div>
+  <p class="hint"><span data-i18n="summarize_hint">右键页面任意位置 →「✂️ 智能摘句」或点击下方按钮。</span><a href="options.html" target="_blank" style="color:#4f8ff7"> DeepSeek</a></p>
+  <button id="summarize-btn" class="primary-btn" data-i18n="summarize_btn">智能摘句</button>
+  <button id="ai-summarize-btn" class="primary-btn" style="display:none;margin-top:6px;background:#7c3aed;" data-i18n="ai_summarize_btn">✨ AI 深度总结</button>
+  <div id="summarize-result" class="result-box"></div>
+  <div class="result-actions" id="summarize-actions" style="display:none">
+    <button class="copy-btn" data-target="summarize-result" data-i18n="copy">复制</button>
+    <button id="summarize-translate-btn" class="copy-btn" style="color:#e67e22" data-i18n="summarize_translate_btn">🌐 翻译</button>
+    <button id="summarize-original-btn" class="copy-btn" style="display:none;color:#3498db" data-i18n="summarize_original_btn">查看原文</button>
+  </div>
+  <div class="promo-bar" id="summarize-promo" style="display:none">
+    <span>🛠 <a href="https://knexio.xyz" target="_blank">knexio.xyz</a> · 100+ 免费在线工具</span>
+  </div>
+</div>
+
+<div class="panel" id="panel-md">
+  <p class="hint" id="md-hint" data-i18n="md_hint">提取正文为 Markdown，免费在线编辑器打开 ✨</p>
+  <div class="save-info">
+    <div class="info-row"><span class="label" data-i18n="save_title_label">标题</span><span id="md-title">-</span></div>
+    <div class="info-row"><span class="label" data-i18n="save_url_label">链接</span><span id="md-url">-</span></div>
+  </div>
+  <button id="md-btn" class="primary-btn" data-i18n="md_btn">打开编辑器</button>
+  <div id="md-result" class="result-box"></div>
+</div>
+
+<div class="footer">
+  <a href="options.html" target="_blank" data-i18n="settings">⚙️ 设置</a>
+  <span class="sep">|</span>
+  <a href="https://knexio.xyz" target="_blank">knexio.xyz</a>
+  <span class="sep">|</span>
+  <span class="version">v1.8.0</span>
+</div>
+
+<script src="i18n.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

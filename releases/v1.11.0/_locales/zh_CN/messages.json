@@ -1,0 +1,306 @@
+{
+  "extensionName": {
+    "message": "Knexio 阅读伴侣",
+    "description": "Extension name"
+  },
+  "extensionDesc": {
+    "message": "翻译+智能摘句，安装即用。可选配 DeepSeek API 解锁 AI 深度总结，隐私优先不偷数据。",
+    "description": "Extension description"
+  },
+  "app_name": {
+    "message": "Knexio 阅读伴侣",
+    "description": "App name in UI"
+  },
+  "translate": {
+    "message": "📝 翻译",
+    "description": "Translate tab"
+  },
+  "summarize": {
+    "message": "🤖 摘要",
+    "description": "Summary tab"
+  },
+  "md_tab": {
+    "message": "📝 转 MD",
+    "description": "Markdown tab"
+  },
+  "settings": {
+    "message": "⚙️ 设置",
+    "description": "Settings link"
+  },
+  "copy": {
+    "message": "复制",
+    "description": "Copy button"
+  },
+  "copied": {
+    "message": "已复制 ✓",
+    "description": "Copied status"
+  },
+  "close": {
+    "message": "✕",
+    "description": "Close button"
+  },
+  "translate_btn": {
+    "message": "翻译",
+    "description": "Translate button"
+  },
+  "translating": {
+    "message": "翻译中…",
+    "description": "Translating status"
+  },
+  "translated": {
+    "message": "已翻译",
+    "description": "Translated status"
+  },
+  "translate_failed": {
+    "message": "翻译失败",
+    "description": "Translate error"
+  },
+  "translate_to_zh": {
+    "message": "翻译成 中文",
+    "description": "Translate to Chinese option"
+  },
+  "translate_to_en": {
+    "message": "翻译成 English",
+    "description": "Translate to English option"
+  },
+  "translate_to_ja": {
+    "message": "翻译成 日本語",
+    "description": "Translate to Japanese option"
+  },
+  "translate_to_ko": {
+    "message": "翻译成 한국어",
+    "description": "Translate to Korean option"
+  },
+  "translate_to_fr": {
+    "message": "翻译成 Français",
+    "description": "Translate to French option"
+  },
+  "translate_to_de": {
+    "message": "翻译成 Deutsch",
+    "description": "Translate to German option"
+  },
+  "translate_to_es": {
+    "message": "翻译成 Español",
+    "description": "Translate to Spanish option"
+  },
+  "translate_to_ru": {
+    "message": "翻译成 Русский",
+    "description": "Translate to Russian option"
+  },
+  "translate_input_hint": {
+    "message": "输入文字，或选中网页文字后点右键翻译...",
+    "description": "Translate input placeholder"
+  },
+  "copy_result": {
+    "message": "复制结果",
+    "description": "Copy result button"
+  },
+  "summarize_ready": {
+    "message": "智能摘句就绪",
+    "description": "Summarize status ready"
+  },
+  "summarize_ready_ai": {
+    "message": "智能摘句就绪 · AI 深度总结已解锁",
+    "description": "Summarize status with AI"
+  },
+  "summarize_ready_no_ai": {
+    "message": "智能摘句就绪 · 配置 DeepSeek 解锁 AI 深度总结",
+    "description": "Summarize status without AI"
+  },
+  "summarize_hint": {
+    "message": "右键页面任意位置 →「✂️ 智能摘句」或点击下方按钮。配置 DeepSeek 后解锁 AI 语义级总结。",
+    "description": "Summarize hint text"
+  },
+  "summarize_btn": {
+    "message": "智能摘句",
+    "description": "Summarize button"
+  },
+  "ai_summarize_btn": {
+    "message": "✨ AI 深度总结",
+    "description": "AI summarize button"
+  },
+  "summarize_analyzing": {
+    "message": "⏳ 分析页面内容...",
+    "description": "Analyzing page status"
+  },
+  "summarize_no_content": {
+    "message": "页面内容太少，无法提取摘要",
+    "description": "No content to summarize"
+  },
+  "summarize_extract_fail": {
+    "message": "提取失败",
+    "description": "Extract failed"
+  },
+  "summarize_ai_thinking": {
+    "message": "⏳ AI 思考中...",
+    "description": "AI thinking status"
+  },
+  "summarize_ai_no_content": {
+    "message": "页面内容太少，无法生成 AI 摘要",
+    "description": "No content for AI summary"
+  },
+  "summarize_ai_no_key": {
+    "message": "请先在设置页配置 DeepSeek API Key",
+    "description": "No API key message"
+  },
+  "summarize_ai_fail": {
+    "message": "AI 摘要失败",
+    "description": "AI summary failed"
+  },
+  "summarize_translate_btn": {
+    "message": "🌐 翻译",
+    "description": "Translate summary button"
+  },
+  "summarize_original_btn": {
+    "message": "查看原文",
+    "description": "Show original button"
+  },
+  "md_hint": {
+    "message": "提取正文为 Markdown，免费在线编辑器打开 ✨",
+    "description": "MD hint text"
+  },
+  "md_hint_summary": {
+    "message": "已检测到摘要 ✅ 将一并发送到编辑器",
+    "description": "MD hint with summary"
+  },
+  "save_title_label": {
+    "message": "标题",
+    "description": "Title label"
+  },
+  "save_url_label": {
+    "message": "链接",
+    "description": "URL label"
+  },
+  "md_btn": {
+    "message": "打开编辑器",
+    "description": "Open editor button"
+  },
+  "md_extracting": {
+    "message": "提取中…",
+    "description": "Extracting status"
+  },
+  "md_ok": {
+    "message": "已复制 ✓ 即将打开编辑器",
+    "description": "MD extract success"
+  },
+  "md_ok_long": {
+    "message": "已复制 ✓ 内容较长，打开后 Cmd+V 粘贴",
+    "description": "MD extract success long content"
+  },
+  "md_fail": {
+    "message": "提取失败，页面内容可能较少或受限制",
+    "description": "MD extract failed"
+  },
+  "float_translate": {
+    "message": "🔤 翻译",
+    "description": "Floating translate button"
+  },
+  "float_translating": {
+    "message": "翻译中…",
+    "description": "Floating translating status"
+  },
+  "ctx_translate": {
+    "message": "🔤 翻译选中文字",
+    "description": "Context menu translate"
+  },
+  "ctx_summarize": {
+    "message": "✂️ 智能摘句（本页）",
+    "description": "Context menu summarize"
+  },
+  "popup_translating": {
+    "message": "翻译中…",
+    "description": "Popup translating"
+  },
+  "popup_translate_title": {
+    "message": "翻译选中文字",
+    "description": "Popup translate title"
+  },
+  "popup_summary_title": {
+    "message": "智能摘句 · 本页摘要",
+    "description": "Popup summary title"
+  },
+  "options_title": {
+    "message": "Knexio 阅读伴侣 — 设置",
+    "description": "Options page title"
+  },
+  "options_api_key": {
+    "message": "DeepSeek API Key",
+    "description": "API key label"
+  },
+  "options_api_key_hint": {
+    "message": "获取 API Key：platform.deepseek.com → API Keys → 创建，新用户免费 500 万 tokens",
+    "description": "API key hint"
+  },
+  "options_save": {
+    "message": "保存",
+    "description": "Save button"
+  },
+  "options_clear": {
+    "message": "清除",
+    "description": "Clear button"
+  },
+  "options_saved": {
+    "message": "已保存",
+    "description": "Saved status"
+  },
+  "options_enter_key": {
+    "message": "请输入 API Key",
+    "description": "Enter API key prompt"
+  },
+  "options_default_lang": {
+    "message": "默认翻译语言",
+    "description": "Default language label"
+  },
+  "options_usage": {
+    "message": "使用说明",
+    "description": "Usage section title"
+  },
+  "options_usage_text": {
+    "message": "安装后直接在网页上选中文字，右键即可翻译或摘句。点击工具栏图标使用完整功能。AI 深度总结需要配置 DeepSeek API Key。",
+    "description": "Usage instructions"
+  },
+  "options_version": {
+    "message": "版本",
+    "description": "Version label"
+  },
+  "lang_zh": {
+    "message": "中文（简体）",
+    "description": "Chinese language option"
+  },
+  "lang_en": {
+    "message": "English",
+    "description": "English language option"
+  },
+  "lang_ja": {
+    "message": "日本語",
+    "description": "Japanese language option"
+  },
+  "lang_ko": {
+    "message": "한국어",
+    "description": "Korean language option"
+  },
+  "lang_fr": {
+    "message": "Français",
+    "description": "French language option"
+  },
+  "lang_de": {
+    "message": "Deutsch",
+    "description": "German language option"
+  },
+  "lang_es": {
+    "message": "Español",
+    "description": "Spanish language option"
+  },
+  "lang_ru": {
+    "message": "Русский",
+    "description": "Russian language option"
+  },
+  "translate_too_long": {
+    "message": "文字太长，最多 5000 字",
+    "description": "Text too long error"
+  },
+  "promo_text": {
+    "message": "100+ 免费在线工具",
+    "description": "Promo bar text"
+  }
+}

@@ -1,4 +1,5 @@
-// Knexio 阅读伴侣 — popup.js
+// Knexio 阅读伴侣 — sidepanel.js
+// 侧边栏版本：复用 popup.js 的核心逻辑
 
 // ── Apply i18n to all [data-i18n] elements ──
 function applyI18n() {
@@ -11,48 +12,44 @@ function applyI18n() {
 }
 applyI18n();
 
-// ── Daily toast: first popup open each day shows knexio promo ──
+// ── Tab switching (sidepanel uses .tab-btn instead of .tab) ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('panel-' + btn.dataset.tab);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// ── Daily toast: first sidepanel open each day shows knexio promo ──
 (async () => {
   const today = new Date().toISOString().slice(0, 10);
   const { lastToast } = await chrome.storage.local.get('lastToast');
   if (lastToast !== today) {
     await chrome.storage.local.set({ lastToast: today });
-    // Wait a beat then inject toast into active tab
     setTimeout(async () => {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab && tab.id && tab.url && !tab.url.startsWith('chrome://')) {
-        const promoText = I18N.t('promo_text');
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: (promoText) => {
-            var toast = document.createElement('div');
-            toast.innerHTML = '🛠 <a href="https://knexio.xyz" target="_blank" style="color:#4f8ff7;font-weight:600">knexio.xyz</a> · ' + promoText;
-            toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:2147483646;background:#1a1a2e;color:#e0e0e0;padding:10px 16px;border-radius:8px;font-size:13px;font-family:-apple-system,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #2a2a3e;transition:opacity 0.5s;opacity:1;pointer-events:auto';
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
-          },
-          args: [promoText]
-        }).catch(() => {});
-      }
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        if (tab && tab.id && tab.url && !tab.url.startsWith('chrome://')) {
+          const promoText = I18N.t('promo_text');
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: (promoText) => {
+              const toast = document.createElement('div');
+              toast.innerHTML = '🛠 <a href="https://knexio.xyz" target="_blank" style="color:#4f8ff7;font-weight:600">knexio.xyz</a> · ' + promoText;
+              toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:2147483646;background:#1a1a2e;color:#e0e0e0;padding:10px 16px;border-radius:8px;font-size:13px;font-family:-apple-system,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid #2a2a3e;transition:opacity 0.5s;opacity:1;pointer-events:auto';
+              document.body.appendChild(toast);
+              setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+            },
+            args: [promoText]
+          }).catch(() => {});
+        }
+      } catch(e) {}
     }, 800);
   }
 })();
-
-// Tab switching
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    // 切换到 MD 标签时，如果已有摘要，改变提示
-    if (tab.dataset.tab === 'md' && summarizeOriginalText && summarizeOriginalText.trim()) {
-      var hint = document.getElementById('md-hint');
-      hint.textContent = I18N.t('md_hint_summary');
-      hint.style.color = '#4ade80';
-    }
-  });
-});
 
 // ── Translate ──
 document.getElementById('translate-btn').addEventListener('click', async () => {
@@ -60,13 +57,13 @@ document.getElementById('translate-btn').addEventListener('click', async () => {
   const target = document.getElementById('translate-to').value;
   const resultBox = document.getElementById('translate-result');
   const actions = document.getElementById('translate-actions');
-  
+
   if (!input) { resultBox.textContent = I18N.t('translate_input_hint'); return; }
   if (input.length > 5000) { resultBox.textContent = I18N.t('translate_too_long'); return; }
-  
+
   resultBox.textContent = I18N.t('translating');
   actions.style.display = 'none';
-  
+
   try {
     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(input)}`);
     const data = await res.json();
@@ -96,7 +93,7 @@ chrome.storage.sync.get(['deepseek_api_key'], async (items) => {
 
 // Extract page content (shared)
 async function extractPageContent() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: () => {
@@ -115,7 +112,7 @@ function buildExtractiveSummary(data) {
   const paras = data.paragraphs;
   if (!paras.length) return I18N.t('summarize_no_content');
   if (paras.length <= 4) return '📄 ' + data.title + '\n\n' + paras.join('\n\n');
-  
+
   const sentences = [];
   paras.forEach((p, i) => {
     const parts = p.split(/(?<=[。！？.!?])\s*/).filter(s => s.length > 10);
@@ -123,9 +120,9 @@ function buildExtractiveSummary(data) {
       sentences.push({ text: s, paraIdx: i, posInPara: j });
     });
   });
-  
+
   if (sentences.length <= 5) return '📄 ' + data.title + '\n\n' + sentences.map(s => s.text).join(' ');
-  
+
   const wordFreq = {};
   sentences.forEach(s => {
     s.text.split(/[，。！？,\.!?\s]+/).forEach(w => {
@@ -133,33 +130,33 @@ function buildExtractiveSummary(data) {
     });
   });
   const totalSentences = sentences.length;
-  
+
   sentences.forEach((s, i) => {
     let score = 0;
     score += 2.0 / Math.sqrt(i / 2 + 1);
     const len = s.text.length;
     if (len > 40 && len < 150) score += 1.5;
     else if (len < 20 || len > 250) score -= 1;
-    
+
     const words = s.text.split(/[，。！？,\.!?\s]+/).filter(w => w.length >= 3);
     let kwScore = 0;
     words.forEach(w => {
       if (wordFreq[w] && wordFreq[w] > 1) kwScore += Math.min(wordFreq[w] / totalSentences * 5, 1);
     });
     score += kwScore / Math.max(words.length, 1) * 3;
-    
+
     if (data.title) {
       const titleWords = new Set(data.title.split(/[\s]+/).filter(w => w.length >= 2));
       words.forEach(w => { if (titleWords.has(w)) score += 0.5; });
     }
     s.score = score;
   });
-  
+
   const topN = Math.min(8, Math.max(4, Math.floor(sentences.length * 0.3)));
   sentences.sort((a, b) => b.score - a.score);
   const picked = sentences.slice(0, topN);
   picked.sort((a, b) => a.paraIdx - b.paraIdx || a.posInPara - b.posInPara);
-  
+
   return '📄 ' + data.title + '\n\n' + picked.map(s => s.text).join(' ');
 }
 
@@ -167,12 +164,12 @@ function buildExtractiveSummary(data) {
 document.getElementById('summarize-btn').addEventListener('click', async () => {
   const btn = document.getElementById('summarize-btn');
   const resultBox = document.getElementById('summarize-result');
-  
+
   btn.disabled = true;
   btn.textContent = I18N.t('summarize_analyzing');
   resultBox.textContent = '';
   document.getElementById('summarize-actions').style.display = 'none';
-  
+
   try {
     const data = await extractPageContent();
     if (!data || !data.paragraphs.length) {
@@ -198,23 +195,23 @@ document.getElementById('summarize-btn').addEventListener('click', async () => {
 document.getElementById('ai-summarize-btn').addEventListener('click', async () => {
   const btn = document.getElementById('ai-summarize-btn');
   const resultBox = document.getElementById('summarize-result');
-  
+
   btn.disabled = true;
   btn.textContent = I18N.t('summarize_ai_thinking');
-  
+
   try {
     if (!currentPageText) {
       const data = await extractPageContent();
       currentPageText = data?.fullText || '';
     }
-    
+
     if (currentPageText.length < 100) {
       resultBox.textContent = I18N.t('summarize_ai_no_content');
       btn.textContent = I18N.t('ai_summarize_btn');
       btn.disabled = false;
       return;
     }
-    
+
     const { deepseek_api_key } = await chrome.storage.sync.get(['deepseek_api_key']);
     if (!deepseek_api_key) {
       resultBox.textContent = I18N.t('summarize_ai_no_key');
@@ -222,7 +219,7 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
       btn.disabled = false;
       return;
     }
-    
+
     const apiRes = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
@@ -239,15 +236,15 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
         temperature: 0.3
       })
     });
-    
-    const data = await apiRes.json();
-    if (data.error) throw new Error(data.error.message || 'API error');
-    resultBox.textContent = data.choices[0].message.content;
+
+    const apiData = await apiRes.json();
+    if (apiData.error) throw new Error(apiData.error.message || 'API error');
+    resultBox.textContent = apiData.choices[0].message.content;
     btn.textContent = I18N.t('ai_summarize_btn');
     btn.disabled = false;
     document.getElementById('summarize-actions').style.display = 'block';
     document.getElementById('summarize-promo').style.display = 'block';
-    
+
   } catch (e) {
     resultBox.textContent = I18N.t('summarize_ai_fail') + ': ' + e.message;
     btn.textContent = I18N.t('ai_summarize_btn');
@@ -255,7 +252,7 @@ document.getElementById('ai-summarize-btn').addEventListener('click', async () =
   }
 });
 
-// ── 摘要翻译按钮 ──
+// ── Summary translate button ──
 let summarizeOriginalText = '';
 let summarizeTranslated = false;
 
@@ -263,20 +260,20 @@ document.getElementById('summarize-translate-btn').addEventListener('click', asy
   const btn = document.getElementById('summarize-translate-btn');
   const origBtn = document.getElementById('summarize-original-btn');
   const resultBox = document.getElementById('summarize-result');
-  
+
   if (summarizeTranslated) return;
-  
+
   const text = resultBox.textContent;
   if (!text || text.startsWith('⏳') || text.startsWith(I18N.t('summarize_extract_fail')) || text === I18N.t('summarize_no_content') || text.startsWith(I18N.t('summarize_ai_fail'))) return;
-  
+
   btn.textContent = I18N.t('translating');
   btn.disabled = true;
-  
+
   try {
     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${encodeURIComponent(text)}`);
     const data = await res.json();
     const translated = data[0].map(x => x[0]).join('');
-    
+
     summarizeOriginalText = text;
     summarizeTranslated = true;
     resultBox.textContent = translated;
@@ -293,7 +290,7 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
   const resultBox = document.getElementById('summarize-result');
   const btn = document.getElementById('summarize-translate-btn');
   const origBtn = document.getElementById('summarize-original-btn');
-  
+
   if (summarizeTranslated) {
     resultBox.textContent = summarizeOriginalText;
     summarizeTranslated = false;
@@ -306,45 +303,49 @@ document.getElementById('summarize-original-btn').addEventListener('click', () =
 
 // ── Markdown 剪藏 ──
 (async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  document.getElementById('md-title').textContent = tab.title;
-  document.getElementById('md-url').textContent = tab.url;
-  // 如果已经生成了摘要，给个提示
-  if (summarizeOriginalText && summarizeOriginalText.trim()) {
-    document.getElementById('md-hint').textContent = I18N.t('md_hint_summary');
-    document.getElementById('md-hint').style.color = '#4ade80';
-  }
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    const titleEl = document.getElementById('md-title');
+    const urlEl = document.getElementById('md-url');
+    if (titleEl) titleEl.textContent = tab.title || '-';
+    if (urlEl) urlEl.textContent = tab.url || '-';
+
+    if (summarizeOriginalText && summarizeOriginalText.trim()) {
+      const hint = document.getElementById('md-hint');
+      if (hint) {
+        hint.textContent = I18N.t('md_hint_summary');
+        hint.style.color = '#4ade80';
+      }
+    }
+  } catch(e) {}
 })();
 
 document.getElementById('md-btn').addEventListener('click', async () => {
   const resultBox = document.getElementById('md-result');
   resultBox.textContent = I18N.t('md_extracting');
   resultBox.className = 'result-box';
-  
+
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     const results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: extractPageAsMarkdown
     });
-    
+
     if (!results || !results[0] || !results[0].result) {
       resultBox.textContent = I18N.t('md_fail');
       resultBox.className = 'result-box error';
       return;
     }
-    
+
     let md = '# ' + tab.title + '\n\n> ' + tab.url + '\n\n';
 
-    // 如果有摘要，加到顶部
     if (summarizeOriginalText && summarizeOriginalText.trim()) {
       md += '## 页面摘要\n\n' + summarizeOriginalText.trim() + '\n\n---\n\n';
     }
 
     md += results[0].result;
-    
-    // Open MarkdownMaster editor with content via URL param
-    // URL-encode and truncate if too long (browser URL limit ~2000 chars)
+
     var urlText = md;
     var truncated = false;
     if (urlText.length > 1500) {
@@ -352,17 +353,13 @@ document.getElementById('md-btn').addEventListener('click', async () => {
       truncated = true;
     }
     var editorUrl = 'https://markdownmaster.site/editor/?text=' + encodeURIComponent(urlText);
-    
+
     resultBox.textContent = truncated ? I18N.t('md_ok_long') : I18N.t('md_ok');
     resultBox.className = 'result-box success';
-    
-    // Copy full content to clipboard (backup)
+
     try { await navigator.clipboard.writeText(md); } catch(e) {}
-    
-    // Use chrome.tabs.create instead of window.open (avoids popup blocker)
-    // But first, try to inject content into an existing editor tab if one is open
+
     chrome.tabs.create({ url: editorUrl, active: false }, function(newTab) {
-      // Tab opens in background with ?text= param — editor.js handles the prefill
       setTimeout(() => {
         try { chrome.tabs.update(newTab.id, { active: true }); } catch(e) {}
       }, 600);
@@ -427,9 +424,7 @@ function extractPageAsMarkdown() {
           return;
         case 'a':
           var href = n.getAttribute('href') || '';
-          if (!href || href.startsWith('javascript:') || href === '#') {
-            Array.from(children).forEach(walk); return;
-          }
+          if (!href || href.startsWith('javascript:') || href === '#') { Array.from(children).forEach(walk); return; }
           if (href.startsWith('/')) href = window.location.origin + href;
           else if (!href.startsWith('http')) href = window.location.origin + '/' + href;
           out += '[' + (n.textContent||'').trim() + '](' + href + ')';
@@ -474,8 +469,10 @@ document.querySelectorAll('.copy-btn[data-target]').forEach(btn => {
   btn.addEventListener('click', (e) => {
     if (btn.id && btn.id !== '') return;
     const target = document.getElementById(btn.dataset.target);
-    navigator.clipboard.writeText(target.textContent);
-    btn.textContent = I18N.t('copied');
-    setTimeout(() => btn.textContent = origText, 1500);
+    if (target && target.textContent) {
+      navigator.clipboard.writeText(target.textContent);
+      btn.textContent = I18N.t('copied');
+      setTimeout(() => btn.textContent = origText, 1500);
+    }
   });
 });
